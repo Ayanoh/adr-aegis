@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ADR-AEGIS v2.0</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background-color: #18181b;
+      color: #f4f4f5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      padding: 40px;
+    }
+    h1 {
+      color: #38bdf8;
+      font-size: 28px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .subtitle {
+      color: #a1a1aa;
+      font-size: 15px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    #diagram-wrapper {
+      background-color: #18181b;
+      width: 100%;
+      overflow: visible;
+    }
+    .mermaid {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    }
+    .mermaid svg {
+      width: 100% !important;
+      min-height: 800px;
+    }
+    .node rect, .node circle, .node ellipse, .node polygon, .node path {
+      stroke-width: 2px !important;
+    }
+    .cluster rect {
+      fill: #1f1f23 !important;
+      stroke: #3f3f46 !important;
+      stroke-width: 1.5px !important;
+      rx: 8px !important;
+      ry: 8px !important;
+    }
+    .cluster text, .cluster .nodeLabel {
+      fill: #e4e4e7 !important;
+      font-weight: 700 !important;
+      font-size: 14px !important;
+    }
+    .edgePath path {
+      stroke: #71717a !important;
+      stroke-width: 1.5px !important;
+    }
+    .edgeLabel {
+      background-color: #18181b !important;
+      color: #a1a1aa !important;
+      font-size: 12px !important;
+      padding: 2px 6px !important;
+      border-radius: 4px !important;
+    }
+    .edgeLabel .label text, .edgeLabel span {
+      fill: #a1a1aa !important;
+      color: #a1a1aa !important;
+    }
+    .label text, .nodeLabel {
+      fill: #f4f4f5 !important;
+    }
+    .legend {
+      margin-top: 40px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #a1a1aa;
+    }
+    .legend-dot {
+      width: 14px; height: 14px; border-radius: 3px; display: inline-block;
+    }
+    .metrics {
+      margin-top: 30px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .metric-card {
+      background: #1f1f23;
+      border: 1px solid #3f3f46;
+      border-radius: 8px;
+      padding: 16px 28px;
+      text-align: center;
+      min-width: 150px;
+    }
+    .metric-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #34d399;
+    }
+    .metric-label {
+      font-size: 12px;
+      color: #a1a1aa;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🛡️ ADR-AEGIS v2.0 — AI Agent Security Architecture</h1>
+  <div class="subtitle">Multi-layered Intelligent Firewall — 238 Tests Passed — 100% Attack Block Rate</div>
+
+  <div id="diagram-wrapper">
+    <pre class="mermaid">
+flowchart TD
+    classDef inputStyle fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff;
+    classDef tier1Style fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#fff;
+    classDef tier2Style fill:#311042,stroke:#c084fc,stroke-width:2px,color:#fff;
+    classDef daemonStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#fff;
+    classDef outputStyle fill:#451a03,stroke:#fb923c,stroke-width:2px,color:#fff;
+    classDef actionBlock fill:#7f1d1d,stroke:#ef4444,stroke-width:2px,color:#fff;
+    classDef actionAllow fill:#065f46,stroke:#10b981,stroke-width:2px,color:#fff;
+    classDef engineStyle fill:#182234,stroke:#38bdf8,stroke-width:2px,color:#fff;
+
+    User(["👤 User / Attacker"]):::inputStyle -->|1. Prompt or Message| Sensor["🔍 SENSOR LAYER<br>- Recursive Deobfuscation: Base64, Hex, URL, ROT13<br>- Extraction: IPs, Shell Commands, Tokens"]:::inputStyle
+    
+    subgraph TIER1 ["⚡ TIER 1: ULTRA-FAST TRIAGE — 5 to 20 ms"]
+        Sensor --> Heuristics["📜 1,803 Heuristic Rules<br>Sigma MITRE + Sage"]:::tier1Style
+        Sensor --> Secrets["🔑 Secrets Scanner<br>210 Gitleaks Patterns + Shannon Entropy"]:::tier1Style
+        Sensor --> WolfML["🐺 Wolf Defender v2 ModernBERT 21ms<br>+ DeBERTa-v3 Prompt Injection 100%"]:::tier1Style
+        Sensor --> PromptGuard["🛡️ Meta Prompt-Guard-86M<br>Anti-Jailbreak DAN & Canary Check"]:::tier1Style
+        Sensor --> VectorDB["🧠 Vector Matcher ChromaDB<br>Semantic Cosine Similarity Memory"]:::tier1Style
+    end
+
+    Heuristics --> Engine{"⚖️ DECISION ENGINE<br>Security Chief<br>Paranoid / Balanced / Relaxed"}:::engineStyle
+    Secrets --> Engine
+    WolfML --> Engine
+    PromptGuard --> Engine
+    VectorDB --> Engine
+
+    Engine -->|Critical Threat| Block1["🚨 ACTION: BLOCK<br>SOC Alert & Immediate Rejection"]:::actionBlock
+    Engine -->|Benign Request| Agent["🤖 AI AGENT LLM<br>Claude, GPT-4, Llama"]:::actionAllow
+
+    subgraph TIER2 ["🧠 TIER 2: DEEP COGNITIVE INVESTIGATION — Ambiguous ASK Cases"]
+        Engine -->|Ambiguous ASK Case| Forensic["🕵️ Forensic Analyst Agent<br>Intent Analysis & Evidence Gathering"]:::tier2Style
+        Forensic --> Critic["⚖️ Critic Agent Adversary<br>Challenge & False-Positive Filter"]:::tier2Style
+        Critic --> Tier2Decision{"Reasoned Verdict"}:::tier2Style
+    end
+
+    Tier2Decision -->|Disguised Attack| Block2["🚨 ACTION: BLOCK<br>Detailed Explanation"]:::actionBlock
+    Tier2Decision -->|Validated Legitimate Use| Agent
+
+    subgraph DAEMON ["🛡️ DAEMON MODE: TOOL EXECUTION BODYGUARD"]
+        Agent -->|2. Tool Call| DaemonInter["🔌 MCP Interceptor & LangChain Hook<br>JSON-RPC 2.0 Middleware"]:::daemonStyle
+        DaemonInter -->|Destructive Command| BlockTool["🛑 JSON-RPC ERROR -32000<br>Tool Not Executed"]:::actionBlock
+        DaemonInter -->|Authorized Action| Tools[("💻 System Tools, DB, APIs")]:::daemonStyle
+        Tools -->|Result| Agent
+    end
+
+    subgraph OUTPUT_GUARD ["📦 OUTPUT CONTROL LAYER"]
+        Agent -->|3. Generated Response| OutputScan["🔒 Output Guard MLCommons 13 Risks<br>- DLP Redaction of Leaked Secrets<br>- S6 CBRN & S8 Cyber Filters"]:::outputStyle
+        OutputScan --> CodeShield["💻 Code Shield Meta PurpleLlama<br>- Static Analysis Top 25 CWE<br>- SQL / XSS / Cmd Injection Detection"]:::outputStyle
+    end
+
+    OutputScan -->|Secret REDACTED| User
+    CodeShield -->|Secured Code + Fix Suggestion| User
+    </pre>
+  </div>
+
+  <div class="metrics">
+    <div class="metric-card"><div class="metric-value">238</div><div class="metric-label">Tests Passed (100%)</div></div>
+    <div class="metric-card"><div class="metric-value">100%</div><div class="metric-label">Recall (Block Rate)</div></div>
+    <div class="metric-card"><div class="metric-value">0%</div><div class="metric-label">False Positives</div></div>
+    <div class="metric-card"><div class="metric-value">~21ms</div><div class="metric-label">Wolf Defender Latency</div></div>
+    <div class="metric-card"><div class="metric-value">1803</div><div class="metric-label">MITRE ATT&CK Rules</div></div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#1e293b;border:2px solid #38bdf8"></span> Input / Sensors</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#1e1b4b;border:2px solid #818cf8"></span> Tier 1 Fast (ML + Rules)</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#311042;border:2px solid #c084fc"></span> Tier 2 Deep (Cognitive)</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#064e3b;border:2px solid #34d399"></span> Daemon Mode (Tools)</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#451a03;border:2px solid #fb923c"></span> Output Guard (Output)</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#7f1d1d;border:2px solid #ef4444"></span> Action BLOCK</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#065f46;border:2px solid #10b981"></span> Action ALLOW</div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#18181b',
+        primaryColor: '#1e293b',
+        primaryBorderColor: '#38bdf8',
+        primaryTextColor: '#ffffff',
+        lineColor: '#71717a',
+        textColor: '#f4f4f5',
+        clusterBkg: '#1f1f23',
+        clusterBorder: '#3f3f46'
+      },
+      flowchart: {
+        useMaxWidth: false,
+        htmlLabels: true,
+        curve: 'basis',
+        nodeSpacing: 30,
+        rankSpacing: 50
+      }
+    });
+  </script>
+</body>
+</html>
