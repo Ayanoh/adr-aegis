@@ -36,6 +36,10 @@ As Large Language Models (LLMs) transition from passive text generators to **aut
 
 ## 🏛️ Architecture Overview
 
+<p align="center">
+  <img src="docs/schema_architecture_english.png" alt="ADR-AEGIS Architecture" width="100%">
+</p>
+
 ADR-AEGIS combines **sub-millisecond deterministic checks** with **modern neural classifiers** and an **escalation-based cognitive dual-agent tier**:
 
 ```mermaid
