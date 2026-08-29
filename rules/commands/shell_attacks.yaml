@@ -1,0 +1,62 @@
+# Shell attack detection rules
+- id: ADR-CMD-001
+  name: Reverse Shell (Netcat)
+  description: Detects netcat-based reverse shell commands
+  category: command_execution
+  patterns:
+    - 'nc\s+.*-e\s+/bin/(ba)?sh'
+    - 'nc\s+.*-c\s+/bin/(ba)?sh'
+    - 'ncat\s+.*-e\s+/bin/(ba)?sh'
+  severity: critical
+  action: block
+  mitre_atlas_id: "AML.T0051"
+  tags: ["reverse_shell", "netcat"]
+
+- id: ADR-CMD-002
+  name: Reverse Shell (Bash /dev/tcp)
+  description: Detects bash reverse shell using /dev/tcp
+  category: command_execution
+  patterns:
+    - '/dev/tcp/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/[0-9]+'
+    - 'bash\s+-i\s+>&\s*/dev/tcp'
+  severity: critical
+  action: block
+  mitre_atlas_id: "AML.T0051"
+  tags: ["reverse_shell", "bash"]
+
+- id: ADR-CMD-003
+  name: Curl Pipe to Shell
+  description: Detects downloading and executing scripts
+  category: command_execution
+  patterns:
+    - 'curl\s+.*\|\s*(ba)?sh'
+    - 'wget\s+.*\|\s*(ba)?sh'
+    - 'curl\s+.*-o\s*-\s*\|\s*(ba)?sh'
+  severity: critical
+  action: block
+  tags: ["download_exec", "curl", "wget"]
+
+- id: ADR-CMD-004
+  name: Recursive Delete
+  description: Detects dangerous recursive delete commands
+  category: command_execution
+  patterns:
+    - 'rm\s+(-[a-zA-Z]*)?\s*-[a-zA-Z]*r[a-zA-Z]*f'
+    - 'rm\s+(-[a-zA-Z]*)?\s*-[a-zA-Z]*f[a-zA-Z]*r'
+    - 'rm\s+-rf\s+/'
+  severity: high
+  action: block
+  tags: ["destructive", "filesystem"]
+
+- id: ADR-CMD-005
+  name: Sensitive File Access
+  description: Detects access to sensitive system files
+  category: credential_theft
+  patterns:
+    - 'cat\s+.*/etc/shadow'
+    - 'cat\s+.*/etc/passwd'
+    - 'cat\s+.*\.ssh/id_rsa'
+    - 'cat\s+.*\.aws/credentials'
+  severity: high
+  action: ask
+  tags: ["credential_access", "sensitive_files"]

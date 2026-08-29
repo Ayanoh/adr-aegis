@@ -1,0 +1,52 @@
+flowchart TD
+    classDef inputStyle fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff;
+    classDef tier1Style fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#fff;
+    classDef tier2Style fill:#311042,stroke:#c084fc,stroke-width:2px,color:#fff;
+    classDef daemonStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#fff;
+    classDef outputStyle fill:#451a03,stroke:#fb923c,stroke-width:2px,color:#fff;
+    classDef actionBlock fill:#7f1d1d,stroke:#ef4444,stroke-width:2px,color:#fff;
+    classDef actionAllow fill:#065f46,stroke:#10b981,stroke-width:2px,color:#fff;
+    classDef engineStyle fill:#182234,stroke:#38bdf8,stroke-width:2px,color:#fff;
+
+    User([👤 Utilisateur / Attaquant]):::inputStyle -->|1. Prompt ou Message| Sensor["🔍 COUCHE CAPTEURS<br>- Désembuage récursif Base64, Hex, URL, ROT13<br>- Extraction IPs, commandes shell, tokens"]:::inputStyle
+    
+    subgraph TIER1 ["⚡ TIER 1 : TRIAGE ULTRA-RAPIDE (5 à 20 ms)"]
+        Sensor --> Heuristics["📜 1 803 Règles Heuristiques<br>(Sigma MITRE ATT&CK + Sage)"]:::tier1Style
+        Sensor --> Secrets["🔑 Scanner de Secrets<br>(210 patterns Gitleaks + Shannon)"]:::tier1Style
+        Sensor --> WolfML["🐺 Wolf Defender v2 ModernBERT 21ms<br>+ DeBERTa-v3 Prompt Injection 100%"]:::tier1Style
+        Sensor --> PromptGuard["🛡️ Meta Prompt-Guard-86M<br>(Anti-Jailbreak DAN et Canary)"]:::tier1Style
+        Sensor --> VectorDB["🧠 Vector Matcher ChromaDB<br>(Mémoire sémantique cosinus)"]:::tier1Style
+    end
+
+    Heuristics --> Engine{"⚖️ MOTEUR DE DÉCISION<br>(Chef de la Sécurité)<br>Presets: Paranoid / Balanced / Relaxed"}:::engineStyle
+    Secrets --> Engine
+    WolfML --> Engine
+    PromptGuard --> Engine
+    VectorDB --> Engine
+
+    Engine -->|Menace Critique| Block1["🚨 ACTION : BLOCK<br>Alerte SOC et Blocage Immédiat"]:::actionBlock
+    Engine -->|Requête Bénigne| Agent["🤖 AGENT IA LLM<br>(Claude, GPT-4, Llama)"]:::actionAllow
+
+    subgraph TIER2 ["🧠 TIER 2 : ENQUÊTE COGNITIVE DEEP (Cas Douteux / ASK)"]
+        Engine -->|Cas Ambigu ASK| Forensic["🕵️ Forensic Agent Enquêteur<br>Analyse intention et preuves"]:::tier2Style
+        Forensic --> Critic["⚖️ Critic Agent Contradicteur<br>Challenge et anti-faux-positifs"]:::tier2Style
+        Critic --> Tier2Decision{"Verdict Argumenté"}:::tier2Style
+    end
+
+    Tier2Decision -->|Attaque Déguisée| Block2["🚨 ACTION : BLOCK<br>Explication détaillée"]:::actionBlock
+    Tier2Decision -->|Usage Légitime Validé| Agent
+
+    subgraph DAEMON ["🛡️ MODE DAEMON : GARDE DU CORPS DES OUTILS"]
+        Agent -->|2. Appel Outil| DaemonInter["🔌 Intercepteur MCP et Hook LangChain<br>(Middleware JSON-RPC 2.0)"]:::daemonStyle
+        DaemonInter -->|Commande Destructrice| BlockTool["🛑 ERREUR JSON-RPC -32000<br>Outil non exécuté"]:::actionBlock
+        DaemonInter -->|Action Autorisée| Tools[("💻 Outils Système, BDD, APIs")]:::daemonStyle
+        Tools -->|Résultat de outil| Agent
+    end
+
+    subgraph OUTPUT_GUARD ["📦 COUCHE DE CONTRÔLE DE SORTIE"]
+        Agent -->|3. Réponse Générée| OutputScan["🔒 Output Guard MLCommons 13 Risques<br>- Caviardage DLP des secrets volés<br>- Filtres S6 CBRN et S8 Cyber"]:::outputStyle
+        OutputScan --> CodeShield["💻 Code Shield Meta PurpleLlama<br>- Analyse statique Top 25 CWE<br>- Détection failles SQL / XSS / Cmd"]:::outputStyle
+    end
+
+    OutputScan -->|Secret Caviardé REDACTED| User
+    CodeShield -->|Code Sécurisé + Correctif| User
