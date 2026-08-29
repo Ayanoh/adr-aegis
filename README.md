@@ -36,46 +36,61 @@ As Large Language Models (LLMs) transition from passive text generators to **aut
 
 ## 🏛️ Architecture Overview
 
-<p align="center">
-  <img src="docs/schema_architecture_english.png" alt="ADR-AEGIS Architecture" width="100%">
-</p>
-
 ADR-AEGIS combines **sub-millisecond deterministic checks** with **modern neural classifiers** and an **escalation-based cognitive dual-agent tier**:
 
 ```mermaid
 flowchart TD
-    subgraph INGESTION ["0. SENSOR & DEOBFUSCATION"]
-        A[Raw Input / Tool Call] --> B[Decoders: Base64 / Hex / Unicode / Homoglyphs]
-        B --> C[Extractors: URLs / Shell Commands / Files / Secrets]
+    classDef inputStyle fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff;
+    classDef tier1Style fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#fff;
+    classDef tier2Style fill:#311042,stroke:#c084fc,stroke-width:2px,color:#fff;
+    classDef daemonStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#fff;
+    classDef outputStyle fill:#451a03,stroke:#fb923c,stroke-width:2px,color:#fff;
+    classDef actionBlock fill:#7f1d1d,stroke:#ef4444,stroke-width:2px,color:#fff;
+    classDef actionAllow fill:#065f46,stroke:#10b981,stroke-width:2px,color:#fff;
+    classDef engineStyle fill:#182234,stroke:#38bdf8,stroke-width:2px,color:#fff;
+
+    User(["👤 User / Attacker"]):::inputStyle -->|1. Prompt or Message| Sensor["🔍 SENSOR LAYER<br>- Recursive Deobfuscation: Base64, Hex, URL, ROT13<br>- Extraction: IPs, Shell Commands, Tokens"]:::inputStyle
+    
+    subgraph TIER1 ["⚡ TIER 1: ULTRA-FAST TRIAGE (5 - 20 ms)"]
+        Sensor --> Heuristics["📜 1,803 Heuristic Rules<br>Sigma MITRE + Sage"]:::tier1Style
+        Sensor --> Secrets["🔑 Secrets Scanner<br>210 Gitleaks Patterns + Shannon Entropy"]:::tier1Style
+        Sensor --> WolfML["🐺 Wolf Defender v2 ModernBERT 21ms<br>+ DeBERTa-v3 Prompt Injection 100%"]:::tier1Style
+        Sensor --> PromptGuard["🛡️ Meta Prompt-Guard-86M<br>Anti-Jailbreak DAN & Canary Check"]:::tier1Style
+        Sensor --> VectorDB["🧠 Vector Matcher ChromaDB<br>Semantic Cosine Similarity Memory"]:::tier1Style
     end
 
-    subgraph TIER1 ["1. TIER 1 FAST ENGINES (< 50ms)"]
-        C --> T1A[Heuristics Engine\n1,803 Sigma & Sage Rules]
-        C --> T1B[Secrets Scanner\n210 Gitleaks & Entropy Rules]
-        C --> T1C[ML Classifier\nDeBERTa-v3]
-        C --> T1D[Wolf Defender\nModernBERT Small]
-        C --> T1E[Vector Matcher\nChromaDB + all-MiniLM-L6]
-        
-        T1A & T1B & T1C & T1D & T1E --> MERGE[Verdict Synthesis]
+    Heuristics --> Engine{"⚖️ DECISION ENGINE<br>Security Chief<br>Paranoid / Balanced / Relaxed"}:::engineStyle
+    Secrets --> Engine
+    WolfML --> Engine
+    PromptGuard --> Engine
+    VectorDB --> Engine
+
+    Engine -->|Critical Threat| Block1["🚨 ACTION: BLOCK<br>SOC Alert & Immediate Rejection"]:::actionBlock
+    Engine -->|Benign Request| Agent["🤖 AI AGENT LLM<br>Claude, GPT-4, Llama"]:::actionAllow
+
+    subgraph TIER2 ["🧠 TIER 2: DEEP COGNITIVE INVESTIGATION (Ambiguous ASK Cases)"]
+        Engine -->|Ambiguous ASK Case| Forensic["🕵️ Forensic Analyst Agent<br>Intent Analysis & Evidence Gathering"]:::tier2Style
+        Forensic --> Critic["⚖️ Critic Agent Adversary<br>Challenge & False-Positive Filter"]:::tier2Style
+        Critic --> Tier2Decision{"Reasoned Verdict"}:::tier2Style
     end
 
-    MERGE -- Decision = BLOCK --> BLOCK_ACT[🚫 Reject & Log Alert]
-    MERGE -- Decision = ALLOW --> EXEC_ACT[✅ Execute Request]
-    MERGE -- Decision = ASK / Ambiguous --> TIER2
+    Tier2Decision -->|Disguised Attack| Block2["🚨 ACTION: BLOCK<br>Detailed Explanation"]:::actionBlock
+    Tier2Decision -->|Validated Legitimate Use| Agent
 
-    subgraph TIER2 ["2. TIER 2 DEEP REASONING (Gemini API)"]
-        TIER2_IN[Quarantine & Context Builder] --> FA[🕵️ Forensic Agent\nDeep Attack Analysis]
-        FA --> CA[⚖️ Critic Agent\nAdversarial False-Alarm Filter]
-        CA --> T2_SYNTH[Final Cognitive Synthesis]
+    subgraph DAEMON ["🛡️ DAEMON MODE: TOOL EXECUTION BODYGUARD"]
+        Agent -->|2. Tool Call| DaemonInter["🔌 MCP Interceptor & LangChain Hook<br>JSON-RPC 2.0 Middleware"]:::daemonStyle
+        DaemonInter -->|Destructive Command| BlockTool["🛑 JSON-RPC ERROR -32000<br>Tool Not Executed"]:::actionBlock
+        DaemonInter -->|Authorized Action| Tools[("💻 System Tools, DB, APIs")]:::daemonStyle
+        Tools -->|Result| Agent
     end
 
-    T2_SYNTH -- Safe --> EXEC_ACT
-    T2_SYNTH -- Malicious --> BLOCK_ACT
-
-    subgraph OUTPUT_SHIELD ["3. OUTPUT GUARD & CODE SHIELD"]
-        EXEC_ACT --> OG[Output Guard: DLP / CBRN S6 / Cyber S8]
-        EXEC_ACT --> CS[Code Shield: CWE-89 / 78 / 502 / 94 / 79]
+    subgraph OUTPUT_GUARD ["📦 OUTPUT CONTROL LAYER"]
+        Agent -->|3. Generated Response| OutputScan["🔒 Output Guard MLCommons 13 Risks<br>- DLP Redaction of Leaked Secrets<br>- S6 CBRN & S8 Cyber Filters"]:::outputStyle
+        OutputScan --> CodeShield["💻 Code Shield Meta PurpleLlama<br>- Static Analysis Top 25 CWE<br>- SQL / XSS / Cmd Injection Detection"]:::outputStyle
     end
+
+    OutputScan -->|Secret REDACTED| User
+    CodeShield -->|Secured Code + Fix Suggestion| User
 ```
 
 ---
