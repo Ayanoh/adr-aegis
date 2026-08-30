@@ -124,8 +124,8 @@ flowchart TD
 
 ```bash
 # Clone the repository
-git clone git@github.com:Ayanoh/adr-aegis.git
-cd adr-aegis
+git clone git@github.com:Ayanoh/Vinci-ADR.git
+cd Vinci-ADR
 
 # Create and activate virtual environment
 python3 -m venv .venv
