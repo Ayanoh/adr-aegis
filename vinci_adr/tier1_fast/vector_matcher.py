@@ -115,8 +115,10 @@ class VectorMatcher:
             self._embedding_model = SentenceTransformer(EMBEDDING_MODEL)
 
             # Use sentence-transformers embedding function from ChromaDB
-            embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
-                model_name=EMBEDDING_MODEL
+            self._embedding_fn = (
+                embedding_functions.SentenceTransformerEmbeddingFunction(
+                    model_name=EMBEDDING_MODEL
+                )
             )
 
             # Initialize ChromaDB
@@ -129,7 +131,7 @@ class VectorMatcher:
             self._collection = self._client.get_or_create_collection(
                 name=COLLECTION_ATTACKS,
                 metadata={"hnsw:space": "cosine"},
-                embedding_function=embedding_fn,
+                embedding_function=self._embedding_fn,
             )
 
             self._initialized = True
@@ -391,11 +393,12 @@ class VectorMatcher:
         if not self._initialized or not self._client:
             return False
         try:
-            # Delete and recreate collection
+            # Delete and recreate collection with consistent embedding function
             self._client.delete_collection(COLLECTION_ATTACKS)
             self._collection = self._client.get_or_create_collection(
                 name=COLLECTION_ATTACKS,
                 metadata={"hnsw:space": "cosine"},
+                embedding_function=getattr(self, "_embedding_fn", None),
             )
             return True
         except (RuntimeError, ValueError, OSError, TypeError, AttributeError) as e:
