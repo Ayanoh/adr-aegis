@@ -15,7 +15,7 @@ import time
 
 import structlog
 
-from aegis.tier1_fast.ml_classifier import MLClassifier
+from vinci_adr.tier1_fast.ml_classifier import MLClassifier
 
 logger = structlog.get_logger()
 
@@ -295,7 +295,7 @@ def format_table(results: list[dict[str, float]]) -> str:
 def main() -> None:
     """Runs the complete evaluation and threshold calibration workflow."""
     print("=" * 80)
-    print(" ADR-AEGIS: ML Prompt Injection Classifier Calibration & Benchmark ")
+    print(" Vinci ADR: ML Prompt Injection Classifier Calibration & Benchmark ")
     print("=" * 80)
     print("Model: ProtectAI/deberta-v3-base-prompt-injection-v2\n")
 

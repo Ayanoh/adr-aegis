@@ -1,27 +1,27 @@
-"""Unit tests for AegisMCPMiddleware and JSON-RPC MCP interception."""
+"""Unit tests for VinciMCPMiddleware and JSON-RPC MCP interception."""
 
 import json
 from unittest.mock import MagicMock
 
 import pytest
 
-from aegis.daemon.interceptor import (
+from vinci_adr.daemon.interceptor import (
     DaemonConfig,
     InterceptionDecision,
     InterceptionResult,
 )
-from aegis.daemon.mcp_interceptor import (
+from vinci_adr.daemon.mcp_interceptor import (
     JSONRPC_INVALID_PARAMS,
     JSONRPC_PARSE_ERROR,
     JSONRPC_SECURITY_POLICY_VIOLATION,
-    AegisMCPMiddleware,
+    VinciMCPMiddleware,
 )
 
 
 def test_mcp_allows_safe_tool_call() -> None:
     """Safe tools/call request is allowed and forwarded."""
     config = DaemonConfig(tool_whitelist={"calculator"})
-    middleware = AegisMCPMiddleware(config=config)
+    middleware = VinciMCPMiddleware(config=config)
 
     request = {
         "jsonrpc": "2.0",
@@ -42,7 +42,7 @@ def test_mcp_allows_safe_tool_call() -> None:
 def test_mcp_blocks_malicious_tool_call() -> None:
     """Dangerous tools/call request is blocked with JSON-RPC error -32000."""
     config = DaemonConfig(strict_mode=True)
-    middleware = AegisMCPMiddleware(config=config)
+    middleware = VinciMCPMiddleware(config=config)
 
     request = {
         "jsonrpc": "2.0",
@@ -62,14 +62,14 @@ def test_mcp_blocks_malicious_tool_call() -> None:
     assert error_resp["id"] == "req-danger"
     assert "error" in error_resp
     assert error_resp["error"]["code"] == JSONRPC_SECURITY_POLICY_VIOLATION
-    assert "AEGIS Security Policy Violation" in error_resp["error"]["message"]
+    assert "Vinci ADR Security Policy Violation" in error_resp["error"]["message"]
     assert error_resp["error"]["data"]["tool"] == "bash"
     assert error_resp["error"]["data"]["decision"] == "block"
 
 
 def test_mcp_passes_non_tool_calls() -> None:
     """Non-tool requests like initialize, tools/list pass through transparently."""
-    middleware = AegisMCPMiddleware()
+    middleware = VinciMCPMiddleware()
 
     init_request = {
         "jsonrpc": "2.0",
@@ -100,7 +100,7 @@ def test_mcp_passes_non_tool_calls() -> None:
 def test_mcp_handles_string_payload() -> None:
     """Raw JSON strings are parsed, evaluated, and serialized back properly."""
     config = DaemonConfig(tool_whitelist={"search"})
-    middleware = AegisMCPMiddleware(config=config)
+    middleware = VinciMCPMiddleware(config=config)
 
     raw_json = json.dumps(
         {
@@ -126,7 +126,7 @@ def test_mcp_handles_string_payload() -> None:
 def test_mcp_blacklist_enforcement() -> None:
     """Blacklisted MCP tools are blocked immediately."""
     config = DaemonConfig(tool_blacklist={"exec_raw_code"})
-    middleware = AegisMCPMiddleware(config=config)
+    middleware = VinciMCPMiddleware(config=config)
 
     request = {
         "jsonrpc": "2.0",
@@ -148,7 +148,7 @@ def test_mcp_blacklist_enforcement() -> None:
 def test_mcp_whitelist_bypass() -> None:
     """Whitelisted tools bypass heavy scanning."""
     config = DaemonConfig(tool_whitelist={"trusted_read"})
-    middleware = AegisMCPMiddleware(config=config)
+    middleware = VinciMCPMiddleware(config=config)
 
     request = {
         "jsonrpc": "2.0",
@@ -168,7 +168,7 @@ def test_mcp_whitelist_bypass() -> None:
 def test_mcp_wrap_handler() -> None:
     """wrap_handler wraps in-process MCP tool handlers with security."""
     config = DaemonConfig(tool_blacklist={"blocked_handler"})
-    middleware = AegisMCPMiddleware(config=config)
+    middleware = VinciMCPMiddleware(config=config)
 
     handler_called = False
 
@@ -188,12 +188,12 @@ def test_mcp_wrap_handler() -> None:
     with pytest.raises(PermissionError) as exc_info:
         wrapped("blocked_handler", {"param": 456})
 
-    assert "AEGIS MCP Interceptor blocked tool" in str(exc_info.value)
+    assert "Vinci ADR MCP Interceptor blocked tool" in str(exc_info.value)
 
 
 def test_mcp_invalid_json_handling() -> None:
     """Malformed JSON string returns standard JSON-RPC parse error code -32700."""
-    middleware = AegisMCPMiddleware()
+    middleware = VinciMCPMiddleware()
 
     malformed_json = '{"jsonrpc": "2.0", "method": "tools/call", INVALID_JSON'
 
@@ -208,7 +208,7 @@ def test_mcp_invalid_json_handling() -> None:
 
 def test_mcp_invalid_params_handling() -> None:
     """tools/call with missing or non-dict params returns error code -32602."""
-    middleware = AegisMCPMiddleware()
+    middleware = VinciMCPMiddleware()
 
     bad_request = {
         "jsonrpc": "2.0",
@@ -235,7 +235,7 @@ def test_mcp_sanitized_input_modification() -> None:
     )
     mock_daemon.intercept.return_value = mock_result
 
-    middleware = AegisMCPMiddleware(daemon=mock_daemon)
+    middleware = VinciMCPMiddleware(daemon=mock_daemon)
 
     request = {
         "jsonrpc": "2.0",

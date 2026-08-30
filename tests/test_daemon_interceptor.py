@@ -1,12 +1,12 @@
-"""Unit tests for AegisDaemon interceptor."""
+"""Unit tests for VinciDaemon interceptor."""
 
 from unittest.mock import MagicMock
 
 import pytest
 
-from aegis.core.schema import ActionDecision, ThreatSeverity, TierSource, Verdict
-from aegis.daemon.interceptor import (
-    AegisDaemon,
+from vinci_adr.core.schema import ActionDecision, ThreatSeverity, TierSource, Verdict
+from vinci_adr.daemon.interceptor import (
+    VinciDaemon,
     DaemonConfig,
     InterceptionDecision,
     InterceptionResult,
@@ -16,7 +16,7 @@ from aegis.daemon.interceptor import (
 def test_daemon_blocks_blacklisted_tool() -> None:
     """Blacklisted tools are blocked immediately."""
     config = DaemonConfig(tool_blacklist={"dangerous_tool"})
-    daemon = AegisDaemon(config)
+    daemon = VinciDaemon(config)
 
     result = daemon.intercept("dangerous_tool", {"arg": "value"})
 
@@ -26,9 +26,9 @@ def test_daemon_blocks_blacklisted_tool() -> None:
 
 
 def test_daemon_allows_whitelisted_tool() -> None:
-    """Whitelisted tools pass without AEGIS analysis."""
+    """Whitelisted tools pass without Vinci ADR analysis."""
     config = DaemonConfig(tool_whitelist={"safe_tool"})
-    daemon = AegisDaemon(config)
+    daemon = VinciDaemon(config)
 
     result = daemon.intercept("safe_tool", {"any": "input"})
 
@@ -38,8 +38,8 @@ def test_daemon_allows_whitelisted_tool() -> None:
 
 
 def test_daemon_blocks_malicious_command() -> None:
-    """Malicious tool inputs are blocked by AEGIS."""
-    daemon = AegisDaemon()
+    """Malicious tool inputs are blocked by Vinci ADR."""
+    daemon = VinciDaemon()
 
     result = daemon.intercept("bash", {"command": "rm -rf / --no-preserve-root"})
 
@@ -51,7 +51,7 @@ def test_daemon_blocks_malicious_command() -> None:
 
 def test_daemon_allows_benign_command() -> None:
     """Safe tool inputs are allowed."""
-    daemon = AegisDaemon()
+    daemon = VinciDaemon()
 
     result = daemon.intercept("search", {"query": "What is the weather today in Paris?"})
 
@@ -61,7 +61,7 @@ def test_daemon_allows_benign_command() -> None:
 def test_daemon_strict_mode_blocks_escalations() -> None:
     """In strict mode, ESCALATE becomes BLOCK."""
     config = DaemonConfig(strict_mode=True)
-    daemon = AegisDaemon(config)
+    daemon = VinciDaemon(config)
 
     # Inject mock engine to ensure an ASK decision
     mock_eval = MagicMock()
@@ -92,7 +92,7 @@ def test_daemon_escalation_callback() -> None:
         return approved
 
     config = DaemonConfig(escalation_callback=callback)
-    daemon = AegisDaemon(config)
+    daemon = VinciDaemon(config)
 
     # Mock engine to simulate ASK verdict
     mock_eval = MagicMock()
@@ -119,7 +119,7 @@ def test_daemon_escalation_callback() -> None:
 
 def test_daemon_wrap_tool() -> None:
     """wrap_tool creates an intercepted wrapper."""
-    daemon = AegisDaemon()
+    daemon = VinciDaemon()
 
     def my_tool(x: int, y: int) -> int:
         return x + y
@@ -133,7 +133,7 @@ def test_daemon_wrap_tool() -> None:
 def test_daemon_wrap_tool_blocks() -> None:
     """Wrapped tool raises PermissionError when blocked."""
     config = DaemonConfig(tool_blacklist={"blocked_fn"})
-    daemon = AegisDaemon(config)
+    daemon = VinciDaemon(config)
 
     def my_tool() -> str:
         return "executed"
@@ -143,12 +143,12 @@ def test_daemon_wrap_tool_blocks() -> None:
     with pytest.raises(PermissionError) as exc_info:
         wrapped()
 
-    assert "AEGIS Daemon blocked tool" in str(exc_info.value)
+    assert "Vinci ADR Daemon blocked tool" in str(exc_info.value)
 
 
 def test_daemon_stats() -> None:
     """Stats tracking works correctly."""
-    daemon = AegisDaemon()
+    daemon = VinciDaemon()
 
     daemon.intercept("tool1", {"safe": "input"})
     daemon.intercept("tool2", {"safe": "input"})
@@ -160,7 +160,7 @@ def test_daemon_stats() -> None:
 
 def test_daemon_serialize_input() -> None:
     """Input serialization properly converts various argument types."""
-    daemon = AegisDaemon()
+    daemon = VinciDaemon()
     serialized = daemon._serialize_input(
         {
             "cmd": "ls -la",

@@ -1,7 +1,7 @@
-"""Unit tests for aegis.tier1_fast.secrets_scanner module."""
+"""Unit tests for vinci_adr.tier1_fast.secrets_scanner module."""
 
-from aegis.core.schema import ActionDecision, ThreatSeverity
-from aegis.tier1_fast.secrets_scanner import (
+from vinci_adr.core.schema import ActionDecision, ThreatSeverity
+from vinci_adr.tier1_fast.secrets_scanner import (
     SecretFinding,
     SecretsScanner,
     calculate_entropy,

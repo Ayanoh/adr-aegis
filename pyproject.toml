@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "adr-aegis"
+name = "vinci-adr"
 version = "0.1.0"
-description = "Agent Detection & Response framework for AI security"
+description = "Vinci ADR — Agent Detection & Response security framework for AI Agents and LLMs"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
@@ -35,3 +35,6 @@ target-version = "py311"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
+
+[tool.setuptools.packages.find]
+include = ["vinci_adr*"]

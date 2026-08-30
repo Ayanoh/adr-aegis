@@ -1,11 +1,11 @@
-"""Integration tests for Tier 2 escalation and cognitive reasoning within ADRAegisEngine."""
+"""Integration tests for Tier 2 escalation and cognitive reasoning within VinciADREngine."""
 
 import json
 
-from aegis.core.engine import ADRAegisEngine, EngineConfig
-from aegis.core.schema import ActionDecision, TierSource
-from aegis.tier2_deep.llm_provider import MockLLMProvider
-from aegis.tier2_deep.orchestrator import Tier2Engine
+from vinci_adr.core.engine import VinciADREngine, EngineConfig
+from vinci_adr.core.schema import ActionDecision, TierSource
+from vinci_adr.tier2_deep.llm_provider import MockLLMProvider
+from vinci_adr.tier2_deep.orchestrator import Tier2Engine
 
 # Reliable ASK case: clean base64 payload that triggers decode_all deobfuscation
 # (is_suspicious=True), boosting an initial ALLOW verdict to Tier 1 ASK.
@@ -56,7 +56,7 @@ def test_ask_escalates_to_block() -> None:
     mock_provider = MockLLMProvider(responses=[forensic_json, critic_json])
     tier2 = Tier2Engine(mock_provider)
     config = EngineConfig(enable_ml=False, enable_vector=False, enable_tier2=True)
-    engine = ADRAegisEngine(config, tier2_engine=tier2)
+    engine = VinciADREngine(config, tier2_engine=tier2)
 
     result = engine.evaluate(ASK_TEST_INPUT)
     assert result.verdict.decision == ActionDecision.BLOCK
@@ -88,7 +88,7 @@ def test_ask_deescalates_to_allow() -> None:
     mock_provider = MockLLMProvider(responses=[forensic_json, critic_json])
     tier2 = Tier2Engine(mock_provider)
     config = EngineConfig(enable_ml=False, enable_vector=False, enable_tier2=True)
-    engine = ADRAegisEngine(config, tier2_engine=tier2)
+    engine = VinciADREngine(config, tier2_engine=tier2)
 
     result = engine.evaluate(ASK_TEST_INPUT)
     assert result.verdict.decision == ActionDecision.ALLOW
@@ -116,7 +116,7 @@ def test_tier2_populates_result_trace() -> None:
     mock_provider = MockLLMProvider(responses=[forensic_json, critic_json])
     tier2 = Tier2Engine(mock_provider)
     config = EngineConfig(enable_ml=False, enable_vector=False, enable_tier2=True)
-    engine = ADRAegisEngine(config, tier2_engine=tier2)
+    engine = VinciADREngine(config, tier2_engine=tier2)
 
     result = engine.evaluate(ASK_TEST_INPUT)
     assert result.tier2 is not None
@@ -140,7 +140,7 @@ def test_block_case_not_escalated() -> None:
     )
     tier2 = Tier2Engine(mock_provider)
     config = EngineConfig(enable_ml=False, enable_vector=False, enable_tier2=True)
-    engine = ADRAegisEngine(config, tier2_engine=tier2)
+    engine = VinciADREngine(config, tier2_engine=tier2)
 
     # Definite Tier 1 BLOCK (Mimikatz credential dump)
     result = engine.evaluate("sekurlsa::logonPasswords")
@@ -155,7 +155,7 @@ def test_allow_case_not_escalated() -> None:
     mock_provider = MockLLMProvider()
     tier2 = Tier2Engine(mock_provider)
     config = EngineConfig(enable_ml=False, enable_vector=False, enable_tier2=True)
-    engine = ADRAegisEngine(config, tier2_engine=tier2)
+    engine = VinciADREngine(config, tier2_engine=tier2)
 
     result = engine.evaluate("Hello, how are you?")
     assert result.verdict.decision == ActionDecision.ALLOW
@@ -168,7 +168,7 @@ def test_tier2_disabled_by_default() -> None:
     """Verify non-regression: Tier 2 is disabled by default, keeping Tier 1 ASK intact."""
     config = EngineConfig(enable_ml=False, enable_vector=False)
     assert config.enable_tier2 is False
-    engine = ADRAegisEngine(config)
+    engine = VinciADREngine(config)
 
     result = engine.evaluate(ASK_TEST_INPUT)
     assert result.verdict.decision == ActionDecision.ASK
@@ -181,7 +181,7 @@ def test_tier2_degrades_safely() -> None:
     mock_provider = MockLLMProvider(default_response="ceci n'est pas du JSON")
     tier2 = Tier2Engine(mock_provider)
     config = EngineConfig(enable_ml=False, enable_vector=False, enable_tier2=True)
-    engine = ADRAegisEngine(config, tier2_engine=tier2)
+    engine = VinciADREngine(config, tier2_engine=tier2)
 
     result = engine.evaluate(ASK_TEST_INPUT)
     assert result.verdict.decision == ActionDecision.ASK

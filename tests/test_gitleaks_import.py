@@ -2,8 +2,8 @@
 
 import re
 
-from aegis.tier1_fast.gitleaks_patterns import GITLEAKS_PATTERNS
-from aegis.tier1_fast.secrets_scanner import SECRET_PATTERNS, SecretsScanner
+from vinci_adr.tier1_fast.gitleaks_patterns import GITLEAKS_PATTERNS
+from vinci_adr.tier1_fast.secrets_scanner import SECRET_PATTERNS, SecretsScanner
 
 
 def test_pattern_count() -> None:
@@ -37,7 +37,7 @@ def test_known_secrets_detected() -> None:
     )
 
     # Verify JWT wasn't in our original patterns (it's from Gitleaks)
-    from aegis.tier1_fast.gitleaks_patterns import GITLEAKS_PATTERNS
+    from vinci_adr.tier1_fast.gitleaks_patterns import GITLEAKS_PATTERNS
 
     gitleaks_names = {p[0] for p in GITLEAKS_PATTERNS}
     assert "jwt" in gitleaks_names, "JWT pattern should come from Gitleaks"

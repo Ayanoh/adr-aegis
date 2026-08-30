@@ -2,7 +2,7 @@
 
 Downloads the official Gitleaks configuration rules (or reads from a local file),
 validates regex compatibility with Python's `re` engine, maps severities, and generates
-`aegis/tier1_fast/gitleaks_patterns.py` for integration with `SecretsScanner`.
+`vinci_adr/tier1_fast/gitleaks_patterns.py` for integration with `SecretsScanner`.
 
 Source: https://github.com/gitleaks/gitleaks
 License: MIT
@@ -24,9 +24,9 @@ logger = structlog.get_logger()
 DEFAULT_GITLEAKS_URL = (
     "https://raw.githubusercontent.com/gitleaks/gitleaks/master/config/gitleaks.toml"
 )
-DEFAULT_OUTPUT_PATH = Path("aegis/tier1_fast/gitleaks_patterns.py")
+DEFAULT_OUTPUT_PATH = Path("vinci_adr/tier1_fast/gitleaks_patterns.py")
 
-# Existing pattern IDs in aegis/tier1_fast/secrets_scanner.py to prevent duplicates
+# Existing pattern IDs in vinci_adr/tier1_fast/secrets_scanner.py to prevent duplicates
 EXISTING_PATTERN_IDS: set[str] = {
     "aws-access-token",  # Covered by aws_access_key_id
     "github-pat",
@@ -45,7 +45,7 @@ EXISTING_PATTERN_IDS: set[str] = {
 def parse_args() -> argparse.Namespace:
     """Parses command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Import Gitleaks secret detection rules into ADR-AEGIS."
+        description="Import Gitleaks secret detection rules into Vinci ADR."
     )
     parser.add_argument(
         "--url",
@@ -92,7 +92,7 @@ def load_gitleaks_toml(url: str, input_path: Path | None = None) -> dict:
     try:
         req = urllib.request.Request(
             url,
-            headers={"User-Agent": "ADR-AEGIS-Importer/1.0"},
+            headers={"User-Agent": "Vinci ADR-Importer/1.0"},
         )
         with urllib.request.urlopen(req, timeout=30.0) as resp:
             content = resp.read()
@@ -241,7 +241,7 @@ def generate_python_file(patterns: list[tuple[str, str, float, str]], output_pat
         "",
         "import re",
         "",
-        "from aegis.core.schema import ThreatSeverity",
+        "from vinci_adr.core.schema import ThreatSeverity",
         "",
         "# (name, compiled_pattern, min_entropy, severity)",
         "GITLEAKS_PATTERNS: list[tuple[str, re.Pattern[str], float, ThreatSeverity]] = [",

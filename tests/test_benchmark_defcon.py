@@ -3,8 +3,8 @@
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from aegis.core.engine import ADRAegisEngine
-from aegis.core.schema import ActionDecision, TierSource, Verdict
+from vinci_adr.core.engine import VinciADREngine
+from vinci_adr.core.schema import ActionDecision, TierSource, Verdict
 from scripts.benchmark_defcon import (
     calculate_metrics,
     load_benchmark_dataset,
@@ -54,7 +54,7 @@ def test_benchmark_metrics_calculation() -> None:
 
 def test_benchmark_engine_evaluation_flow() -> None:
     """run_defcon_benchmark executes successfully on a mock engine."""
-    mock_engine = MagicMock(spec=ADRAegisEngine)
+    mock_engine = MagicMock(spec=VinciADREngine)
     mock_eval_res = MagicMock()
     mock_eval_res.verdict = Verdict(
         decision=ActionDecision.BLOCK,
@@ -101,7 +101,7 @@ def test_benchmark_latency_tracking() -> None:
 
 def test_demo_scenario_execution_input_guards() -> None:
     """Demo scenarios 1 and 2 execute cleanly without error."""
-    mock_engine = MagicMock(spec=ADRAegisEngine)
+    mock_engine = MagicMock(spec=VinciADREngine)
     mock_eval_res = MagicMock()
     mock_eval_res.verdict = Verdict(
         decision=ActionDecision.BLOCK,

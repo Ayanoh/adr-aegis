@@ -1,6 +1,6 @@
 """Unit tests for imported SigmaHQ behavioral threat detection rules."""
 
-from aegis.tier1_fast.heuristics import HeuristicsEngine
+from vinci_adr.tier1_fast.heuristics import HeuristicsEngine
 
 
 def test_sigma_rule_count() -> None:

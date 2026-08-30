@@ -1,9 +1,9 @@
-"""Unit tests for aegis.tier1_fast.ml_classifier module."""
+"""Unit tests for vinci_adr.tier1_fast.ml_classifier module."""
 
 import pytest
 
-from aegis.core.schema import ActionDecision
-from aegis.tier1_fast.ml_classifier import ClassificationResult, MLClassifier
+from vinci_adr.core.schema import ActionDecision
+from vinci_adr.tier1_fast.ml_classifier import ClassificationResult, MLClassifier
 
 # Check if ML dependencies are available in the test environment
 try:

@@ -2,7 +2,7 @@
 
 import pytest
 
-from aegis.tier1_fast.ml_classifier import MLClassifier
+from vinci_adr.tier1_fast.ml_classifier import MLClassifier
 from scripts.evaluate_ml import (
     compute_predictions,
     evaluate_at_threshold,

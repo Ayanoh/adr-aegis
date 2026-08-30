@@ -1,7 +1,7 @@
-"""Unit tests for the ADR-AEGIS Output Guard engine."""
+"""Unit tests for the Vinci ADR Output Guard engine."""
 
-from aegis.output_guard.scanner import OutputGuardEngine
-from aegis.output_guard.schema import (
+from vinci_adr.output_guard.scanner import OutputGuardEngine
+from vinci_adr.output_guard.schema import (
     OutputDecision,
     OutputGuardConfig,
     SafetyCategory,

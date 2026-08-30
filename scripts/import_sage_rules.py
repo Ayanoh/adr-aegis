@@ -1,7 +1,7 @@
-"""Import and convert detection rules from the Sage project into ADR-AEGIS format.
+"""Import and convert detection rules from the Sage project into Vinci ADR format.
 
 Reads threat YAML rules from the Sage repository (Tache 1/sage-repo/threats/*.yaml),
-validates rule IDs and regex patterns, transforms the schema to ADR-AEGIS ThreatRule
+validates rule IDs and regex patterns, transforms the schema to Vinci ADR ThreatRule
 definitions, and outputs them into rules/sage/*.yaml.
 
 Attribution:
@@ -22,14 +22,14 @@ import yaml
 # Regex pattern for rule ID validation (supports 1 to 3 alpha segments up to 10 chars)
 RULE_ID_PATTERN = re.compile(r"^[A-Z]{2,6}(-[A-Z]{2,10}){1,3}-\d{3,4}$")
 
-# Severity mapping: Sage -> ADR-AEGIS
+# Severity mapping: Sage -> Vinci ADR
 SEVERITY_MAP = {
     "critical": "critical",
     "warning": "medium",
     "info": "low",
 }
 
-# Action mapping: Sage -> ADR-AEGIS
+# Action mapping: Sage -> Vinci ADR
 ACTION_MAP = {
     "critical": "block",
     "warning": "ask",
@@ -49,7 +49,7 @@ def parse_args() -> argparse.Namespace:
     default_output = Path(__file__).resolve().parents[1] / "rules" / "sage"
 
     parser = argparse.ArgumentParser(
-        description="Import and convert Sage threat detection rules to ADR-AEGIS format."
+        description="Import and convert Sage threat detection rules to Vinci ADR format."
     )
     parser.add_argument(
         "--source",
@@ -61,7 +61,7 @@ def parse_args() -> argparse.Namespace:
         "--output",
         type=Path,
         default=default_output,
-        help=f"Path to ADR-AEGIS output rules directory (default: {default_output})",
+        help=f"Path to Vinci ADR output rules directory (default: {default_output})",
     )
     return parser.parse_args()
 
@@ -69,11 +69,11 @@ def parse_args() -> argparse.Namespace:
 def import_sage_rules(
     source_dir: Path, output_dir: Path
 ) -> tuple[int, int, list[tuple[str, str]], dict[str, int]]:
-    """Converts Sage YAML rules to ADR-AEGIS rule files.
+    """Converts Sage YAML rules to Vinci ADR rule files.
 
     Args:
         source_dir: Source directory containing Sage threat YAML files.
-        output_dir: Output directory to write converted ADR-AEGIS rules.
+        output_dir: Output directory to write converted Vinci ADR rules.
 
     Returns:
         Tuple of (total_read, excluded_count, skipped_regex, severity_counts).
@@ -224,7 +224,7 @@ def main() -> None:
     args = parse_args()
 
     print("=" * 80)
-    print(" ADR-AEGIS: Sage Rules Import & Conversion ")
+    print(" Vinci ADR: Sage Rules Import & Conversion ")
     print("=" * 80)
     print(f"Source : {args.source}")
     print(f"Output : {args.output}\n")

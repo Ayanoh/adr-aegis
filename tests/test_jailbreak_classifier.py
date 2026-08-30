@@ -1,11 +1,11 @@
-"""Unit tests for aegis.tier1_fast.jailbreak_classifier module (Prompt-Guard-86M)."""
+"""Unit tests for vinci_adr.tier1_fast.jailbreak_classifier module (Prompt-Guard-86M)."""
 
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from aegis.core.schema import ActionDecision, ThreatSeverity, TierSource
-from aegis.tier1_fast.jailbreak_classifier import (
+from vinci_adr.core.schema import ActionDecision, ThreatSeverity, TierSource
+from vinci_adr.tier1_fast.jailbreak_classifier import (
     JailbreakClassifier,
     JailbreakResult,
 )

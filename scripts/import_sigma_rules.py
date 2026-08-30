@@ -1,4 +1,4 @@
-"""Imports and converts SigmaHQ behavioral detection rules into ADR-AEGIS ThreatRules.
+"""Imports and converts SigmaHQ behavioral detection rules into Vinci ADR ThreatRules.
 
 Focuses specifically on high-value text and command-level threat detection categories:
 - Windows Process Creation (Command Line / LOLBins)
@@ -22,8 +22,8 @@ import structlog
 import yaml
 from pydantic import ValidationError
 
-from aegis.core.rules import ThreatRule
-from aegis.core.schema import ActionDecision, ThreatSeverity
+from vinci_adr.core.rules import ThreatRule
+from vinci_adr.core.schema import ActionDecision, ThreatSeverity
 
 logger = structlog.get_logger()
 
@@ -68,7 +68,7 @@ SEVERITY_ACTION_MAP: dict[str, tuple[ThreatSeverity, ActionDecision]] = {
 def parse_args() -> argparse.Namespace:
     """Parses CLI arguments."""
     parser = argparse.ArgumentParser(
-        description="Import Sigma detection rules into ADR-AEGIS format."
+        description="Import Sigma detection rules into Vinci ADR format."
     )
     parser.add_argument(
         "--sigma-dir",
@@ -80,7 +80,7 @@ def parse_args() -> argparse.Namespace:
         "--output-dir",
         type=Path,
         default=DEFAULT_OUTPUT_DIR,
-        help=f"Output directory for ADR-AEGIS rules (default: {DEFAULT_OUTPUT_DIR})",
+        help=f"Output directory for Vinci ADR rules (default: {DEFAULT_OUTPUT_DIR})",
     )
     parser.add_argument(
         "--repo-url",
@@ -401,7 +401,7 @@ def process_sigma_rule(
 
     Args:
         raw_data: Parsed Sigma YAML dictionary.
-        rule_id: Formatted unique ID for ADR-AEGIS.
+        rule_id: Formatted unique ID for Vinci ADR.
         category: Assigned category string.
 
     Returns:
@@ -557,7 +557,7 @@ def main() -> None:
     total_skipped = 0
 
     print("=" * 65)
-    print(" Sigma Rules Import — ADR-AEGIS")
+    print(" Sigma Rules Import — Vinci ADR")
     print("=" * 65)
 
     for rel_subdir, config in CATEGORY_CONFIGS.items():

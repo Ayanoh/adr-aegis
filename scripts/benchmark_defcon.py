@@ -1,6 +1,6 @@
-"""DEF CON 31 & Real-World Attack Benchmark for ADR-AEGIS.
+"""DEF CON 31 & Real-World Attack Benchmark for Vinci ADR.
 
-Evaluates ADR-AEGIS against a comprehensive test suite of real-world attacks
+Evaluates Vinci ADR against a comprehensive test suite of real-world attacks
 (DEF CON 31 AI Village, Lakera Mosscap, JailbreakBench) and benign enterprise queries,
 calculating Precision, Recall (Block Rate), F1-Score, False Positive Rate, and Latency percentiles.
 """
@@ -14,8 +14,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-from aegis.core.engine import ADRAegisEngine, EngineConfig, SensitivityPreset
-from aegis.core.schema import ActionDecision
+from vinci_adr.core.engine import VinciADREngine, EngineConfig, SensitivityPreset
+from vinci_adr.core.schema import ActionDecision
 
 # Representative benchmark samples curated from DEF CON 31, Mosscap, and Enterprise Corpora
 BENCHMARK_SAMPLES: list[dict[str, Any]] = [
@@ -225,14 +225,14 @@ def calculate_metrics(results: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def run_defcon_benchmark(
-    engine: ADRAegisEngine | None = None,
+    engine: VinciADREngine | None = None,
     dataset: list[dict[str, Any]] | None = None,
     limit: int | None = None,
 ) -> dict[str, Any]:
     """Execute the benchmark on the dataset and return detailed results and metrics.
 
     Args:
-        engine: Optional pre-configured ADRAegisEngine instance.
+        engine: Optional pre-configured VinciADREngine instance.
         dataset: Optional list of test samples.
         limit: Optional maximum number of samples.
 
@@ -241,7 +241,7 @@ def run_defcon_benchmark(
     """
     if engine is None:
         config = EngineConfig(sensitivity=SensitivityPreset.BALANCED)
-        engine = ADRAegisEngine(config)
+        engine = VinciADREngine(config)
 
     samples = dataset or load_benchmark_dataset(limit=limit)
     evaluation_results: list[dict[str, Any]] = []
@@ -286,7 +286,7 @@ def print_benchmark_report(benchmark_output: dict[str, Any]) -> None:
     m = benchmark_output["metrics"]
 
     print("\n" + "=" * 78)
-    print("      ADR-AEGIS — RAPPORT SCIENTIFIQUE DE BENCHMARK (DEF CON 31 / REAL-WORLD)")
+    print("      Vinci ADR — RAPPORT SCIENTIFIQUE DE BENCHMARK (DEF CON 31 / REAL-WORLD)")
     print("=" * 78)
     print(f" Total d'échantillons évalués : {m['total_samples']}")
     print(f" Attaques réelles testées     : {m['true_positives'] + m['false_negatives']}")
@@ -311,7 +311,7 @@ def print_benchmark_report(benchmark_output: dict[str, Any]) -> None:
 
 def main() -> None:
     """CLI entry point for running the benchmark."""
-    parser = argparse.ArgumentParser(description="Run DEF CON 31 benchmark on ADR-AEGIS engine.")
+    parser = argparse.ArgumentParser(description="Run DEF CON 31 benchmark on Vinci ADR engine.")
     parser.add_argument(
         "--limit",
         type=int,
@@ -326,8 +326,8 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    print("Initialisation du moteur ADR-AEGIS pour le benchmark DEF CON 31...")
-    engine = ADRAegisEngine(
+    print("Initialisation du moteur Vinci ADR pour le benchmark DEF CON 31...")
+    engine = VinciADREngine(
         EngineConfig(
             sensitivity=SensitivityPreset.BALANCED,
         )

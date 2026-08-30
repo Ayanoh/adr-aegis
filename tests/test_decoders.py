@@ -1,6 +1,6 @@
-"""Unit tests for aegis.sensor.decoders module."""
+"""Unit tests for vinci_adr.sensor.decoders module."""
 
-from aegis.sensor.decoders import (
+from vinci_adr.sensor.decoders import (
     DecodedResult,
     decode_all,
     decode_base64,

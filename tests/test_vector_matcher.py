@@ -1,9 +1,9 @@
-"""Unit tests for aegis.tier1_fast.vector_matcher module."""
+"""Unit tests for vinci_adr.tier1_fast.vector_matcher module."""
 
 import pytest
 
-from aegis.core.schema import ActionDecision, ThreatSeverity
-from aegis.tier1_fast.vector_matcher import VectorMatch, VectorMatcher
+from vinci_adr.core.schema import ActionDecision, ThreatSeverity
+from vinci_adr.tier1_fast.vector_matcher import VectorMatch, VectorMatcher
 
 # Check if vector dependencies are available in the test environment
 try:

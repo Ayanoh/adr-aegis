@@ -1,7 +1,7 @@
-"""Unit tests for aegis.sensor.extractors module."""
+"""Unit tests for vinci_adr.sensor.extractors module."""
 
-from aegis.core.schema import ExtractedArtifacts
-from aegis.sensor.extractors import (
+from vinci_adr.core.schema import ExtractedArtifacts
+from vinci_adr.sensor.extractors import (
     extract_all,
     extract_file_paths,
     extract_secrets,

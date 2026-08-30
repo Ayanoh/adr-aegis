@@ -1,1 +1,1 @@
-"""Test suite for ADR-AEGIS."""
+"""Test suite for Vinci ADR."""

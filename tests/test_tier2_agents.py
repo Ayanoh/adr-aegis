@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from aegis.core.schema import (
+from vinci_adr.core.schema import (
     ActionDecision,
     ExtractedArtifacts,
     ThreatMatch,
@@ -13,15 +13,15 @@ from aegis.core.schema import (
     Tier2Input,
     TierSource,
 )
-from aegis.tier2_deep.agents import (
+from vinci_adr.tier2_deep.agents import (
     CriticAgent,
     ForensicAgent,
     Tier2ParsingError,
     _strip_code_fences,
     parse_assessment,
 )
-from aegis.tier2_deep.llm_provider import GeminiProvider, MockLLMProvider
-from aegis.tier2_deep.orchestrator import Tier2Engine, Tier2Result
+from vinci_adr.tier2_deep.llm_provider import GeminiProvider, MockLLMProvider
+from vinci_adr.tier2_deep.orchestrator import Tier2Engine, Tier2Result
 
 
 @pytest.fixture

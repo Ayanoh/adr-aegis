@@ -1,8 +1,8 @@
-"""Unit tests for aegis.tier1_fast.heuristics and aegis.core.rules modules."""
+"""Unit tests for vinci_adr.tier1_fast.heuristics and vinci_adr.core.rules modules."""
 
-from aegis.core.rules import RuleSet, ThreatRule
-from aegis.core.schema import ActionDecision, ThreatSeverity
-from aegis.tier1_fast.heuristics import HeuristicsEngine
+from vinci_adr.core.rules import RuleSet, ThreatRule
+from vinci_adr.core.schema import ActionDecision, ThreatSeverity
+from vinci_adr.tier1_fast.heuristics import HeuristicsEngine
 
 
 def test_threat_rule_creation() -> None:

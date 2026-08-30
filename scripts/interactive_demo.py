@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-ADR-AEGIS - Demo Interactive CLI
+Vinci ADR - Demo Interactive CLI
 
-Simule un agent IA dont les actions sont interceptees par ADR-AEGIS.
+Simule un agent IA dont les actions sont interceptees par Vinci ADR.
 Parfait pour une demonstration live devant un manager.
 
 Usage:
@@ -55,7 +55,7 @@ def print_help():
 {Colors.BOLD}COMMANDES DISPONIBLES:{Colors.RESET}
 
   {Colors.GREEN}[Tapez n'importe quelle commande/prompt]{Colors.RESET}
-    ADR-AEGIS analysera et decidera: ALLOW / BLOCK / ASK / SANITIZE
+    Vinci ADR analysera et decidera: ALLOW / BLOCK / ASK / SANITIZE
 
   {Colors.YELLOW}:mode <paranoid|balanced|relaxed>{Colors.RESET}
     Change le niveau de sensibilite du moteur
@@ -122,7 +122,7 @@ def print_examples():
     print(examples)
 
 def main():
-    parser = argparse.ArgumentParser(description="ADR-AEGIS Interactive Demo")
+    parser = argparse.ArgumentParser(description="Vinci ADR Interactive Demo")
     parser.add_argument(
         "--mode",
         choices=["paranoid", "balanced", "relaxed"],
@@ -132,18 +132,18 @@ def main():
     args = parser.parse_args()
 
     # Import apres le parsing pour un demarrage rapide
-    print("\nChargement d'ADR-AEGIS...", end="", flush=True)
+    print("\nChargement d'Vinci ADR...", end="", flush=True)
 
     import os
     from dotenv import load_dotenv
     load_dotenv()  # Charge .env pour GEMINI_API_KEY
 
-    from aegis.core.engine import ADRAegisEngine, EngineConfig, SensitivityPreset
-    from aegis.core.schema import ActionDecision
-    from aegis.output_guard import OutputGuardEngine
-    from aegis.code_shield import CodeShieldScanner
-    from aegis.tier2_deep.llm_provider import GeminiProvider
-    from aegis.tier2_deep.orchestrator import Tier2Engine
+    from vinci_adr.core.engine import VinciADREngine, EngineConfig, SensitivityPreset
+    from vinci_adr.core.schema import ActionDecision
+    from vinci_adr.output_guard import OutputGuardEngine
+    from vinci_adr.code_shield import CodeShieldScanner
+    from vinci_adr.tier2_deep.llm_provider import GeminiProvider
+    from vinci_adr.tier2_deep.orchestrator import Tier2Engine
 
     # Configuration du moteur
     preset_map = {
@@ -170,7 +170,7 @@ def main():
         enable_tier2=tier2_enabled,
         enable_jailbreak_classifier=True,  # Active aussi le classifieur jailbreak
     )
-    engine = ADRAegisEngine(config, tier2_engine=tier2_engine)
+    engine = VinciADREngine(config, tier2_engine=tier2_engine)
     output_guard = OutputGuardEngine()
     code_scanner = CodeShieldScanner()
 
@@ -196,8 +196,8 @@ def main():
     else:
         print(f"Tier 2 Cognitif: {colored('INACTIF', Colors.YELLOW)}")
     print()
-    print("Tapez {colored(':help', Colors.YELLOW)} pour voir les commandes disponibles.")
-    print("Tapez {colored(':examples', Colors.YELLOW)} pour voir des exemples d'attaques.\n")
+    print(f"Tapez {colored(':help', Colors.YELLOW)} pour voir les commandes disponibles.")
+    print(f"Tapez {colored(':examples', Colors.YELLOW)} pour voir des exemples d'attaques.\n")
 
     code_mode = False
     code_buffer = []
@@ -232,9 +232,9 @@ def main():
                         else:
                             print(f"  Verdict: {colored('INSECURE', Colors.RED)}")
                             for vuln in result.vulnerabilities:
-                                print(f"    - {vuln.cwe_type.value}: {vuln.description}")
-                                if vuln.suggestion:
-                                    print(f"      Fix: {vuln.suggestion}")
+                                print(f"    - {vuln.cwe_type.value}: {vuln.snippet}")
+                                if vuln.remediation_suggestion:
+                                    print(f"      Fix: {vuln.remediation_suggestion}")
                         print(f"  Risk Score: {result.risk_score:.2f}")
                         print(f"  Latence: {latency:.1f}ms\n")
                     continue
@@ -276,7 +276,7 @@ def main():
                     if cmd_arg.lower() in preset_map:
                         current_mode = cmd_arg.lower()
                         config = EngineConfig(sensitivity=preset_map[current_mode])
-                        engine = ADRAegisEngine(config)
+                        engine = VinciADREngine(config)
                         print(f"Mode change: {colored(current_mode.upper(), Colors.CYAN)}\n")
                     else:
                         print(f"Modes disponibles: paranoid, balanced, relaxed\n")
@@ -318,8 +318,8 @@ def main():
                     print(f"Commande inconnue: {cmd_name}. Tapez :help\n")
                     continue
 
-            # Analyse standard via le moteur ADR-AEGIS
-            print(f"\n{Colors.BOLD}[ADR-AEGIS] Interception et analyse...{Colors.RESET}")
+            # Analyse standard via le moteur Vinci ADR
+            print(f"\n{Colors.BOLD}[Vinci ADR] Interception et analyse...{Colors.RESET}")
 
             t0 = time.perf_counter()
             result = engine.evaluate(user_input)

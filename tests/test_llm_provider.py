@@ -8,7 +8,7 @@ from typing import Self
 
 import pytest
 
-from aegis.tier2_deep.llm_provider import (
+from vinci_adr.tier2_deep.llm_provider import (
     GeminiProvider,
     LLMProviderError,
     MockLLMProvider,

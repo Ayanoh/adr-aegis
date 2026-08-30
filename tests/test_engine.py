@@ -1,14 +1,14 @@
-"""Unit tests for aegis.core.engine module."""
+"""Unit tests for vinci_adr.core.engine module."""
 
 import base64
 
-from aegis.core.engine import (
-    ADRAegisEngine,
+from vinci_adr.core.engine import (
+    VinciADREngine,
     EngineConfig,
     EvaluationResult,
     SensitivityPreset,
 )
-from aegis.core.schema import (
+from vinci_adr.core.schema import (
     ActionDecision,
     AgentEvent,
     ThreatMatch,
@@ -20,14 +20,14 @@ from aegis.core.schema import (
 
 def _create_fast_engine(
     sensitivity: SensitivityPreset = SensitivityPreset.BALANCED,
-) -> ADRAegisEngine:
+) -> VinciADREngine:
     """Helper to create engine with ML and vector models disabled for fast tests."""
     config = EngineConfig(
         sensitivity=sensitivity,
         enable_ml=False,
         enable_vector=False,
     )
-    return ADRAegisEngine(config)
+    return VinciADREngine(config)
 
 
 def test_sensitivity_preset_values() -> None:
@@ -83,21 +83,21 @@ def test_ml_threshold_by_preset() -> None:
         enable_ml=False,
         enable_vector=False,
     )
-    assert ADRAegisEngine(cfg_p)._get_ml_threshold() == 0.05
+    assert VinciADREngine(cfg_p)._get_ml_threshold() == 0.05
 
     cfg_b = EngineConfig(
         sensitivity=SensitivityPreset.BALANCED,
         enable_ml=False,
         enable_vector=False,
     )
-    assert ADRAegisEngine(cfg_b)._get_ml_threshold() == 0.50
+    assert VinciADREngine(cfg_b)._get_ml_threshold() == 0.50
 
     cfg_r = EngineConfig(
         sensitivity=SensitivityPreset.RELAXED,
         enable_ml=False,
         enable_vector=False,
     )
-    assert ADRAegisEngine(cfg_r)._get_ml_threshold() == 0.50
+    assert VinciADREngine(cfg_r)._get_ml_threshold() == 0.50
 
 
 def test_merge_verdicts_empty() -> None:
@@ -320,7 +320,7 @@ def test_sensitivity_paranoid() -> None:
         enable_ml=False,
         enable_vector=False,
     )
-    engine = ADRAegisEngine(config)
+    engine = VinciADREngine(config)
     assert engine._get_confidence_threshold() == 0.70
 
     # In paranoid mode, even lower confidence BLOCK verdicts are kept as BLOCK
@@ -351,7 +351,7 @@ def test_sensitivity_relaxed() -> None:
         enable_ml=False,
         enable_vector=False,
     )
-    engine = ADRAegisEngine(config)
+    engine = VinciADREngine(config)
     assert engine._get_confidence_threshold() == 0.95
 
     # In relaxed mode, a BLOCK with 0.80 confidence (< 0.95) downgrades to ASK
@@ -376,7 +376,7 @@ def test_sensitivity_relaxed() -> None:
 
 
 def test_engine_jailbreak_classifier_integration() -> None:
-    """Verify ADRAegisEngine with enable_jailbreak_classifier=True integrates jailbreak verdict."""
+    """Verify VinciADREngine with enable_jailbreak_classifier=True integrates jailbreak verdict."""
     config = EngineConfig(
         enable_heuristics=False,
         enable_secrets=False,
@@ -384,7 +384,7 @@ def test_engine_jailbreak_classifier_integration() -> None:
         enable_vector=False,
         enable_jailbreak_classifier=True,
     )
-    engine = ADRAegisEngine(config)
+    engine = VinciADREngine(config)
     assert engine.config.enable_jailbreak_classifier is True
 
     if engine._jailbreak and engine._jailbreak.is_available:

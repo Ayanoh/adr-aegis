@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Automated Adversarial Benchmark for ADR-AEGIS using NVIDIA/garak.
+"""Automated Adversarial Benchmark for Vinci ADR using NVIDIA/garak.
 
-This script runs garak vulnerability probes against ADR-AEGIS (acting as a target generator)
-and evaluates how effectively ADR-AEGIS detects and blocks various attack vectors:
+This script runs garak vulnerability probes against Vinci ADR (acting as a target generator)
+and evaluates how effectively Vinci ADR detects and blocks various attack vectors:
   - DAN & Roleplay Jailbreaks (probes.dan)
   - Prompt Injections (probes.promptinject)
   - Obfuscation & Encodings (probes.encoding)
@@ -30,8 +30,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from aegis.integrations.aegis_detector import AegisBlockDetector
-from aegis.integrations.garak_generator import AegisGenerator
+from vinci_adr.integrations.vinci_detector import VinciBlockDetector
+from vinci_adr.integrations.garak_generator import VinciGenerator
 
 # Default fast probes covering all 5 key adversarial families
 DEFAULT_PROBES_FAST = [
@@ -53,44 +53,48 @@ DEFAULT_PROBES_FULL = [
 ]
 
 
-def register_aegis_garak_plugins() -> None:
-    """Register AegisGenerator and AegisBlockDetector as first-class garak plugins."""
+def register_vinci_garak_plugins() -> None:
+    """Register VinciGenerator and VinciBlockDetector as first-class garak plugins."""
     # Align class module names to garak plugin conventions
-    AegisGenerator.__module__ = "garak.generators.aegis"
-    AegisBlockDetector.__module__ = "garak.detectors.aegis"
+    VinciGenerator.__module__ = "garak.generators.vinci_adr"
+    VinciBlockDetector.__module__ = "garak.detectors.vinci_adr"
 
     # Inject into sys.modules
-    gen_mod = types.ModuleType("garak.generators.aegis")
-    gen_mod.AegisGenerator = AegisGenerator
-    gen_mod.DEFAULT_CLASS = "AegisGenerator"
-    sys.modules["garak.generators.aegis"] = gen_mod
+    gen_mod = types.ModuleType("garak.generators.vinci_adr")
+    gen_mod.VinciGenerator = VinciGenerator
+    gen_mod.DEFAULT_CLASS = "VinciGenerator"
+    sys.modules["garak.generators.vinci_adr"] = gen_mod
 
-    det_mod = types.ModuleType("garak.detectors.aegis")
-    det_mod.AegisBlockDetector = AegisBlockDetector
-    det_mod.DEFAULT_CLASS = "AegisBlockDetector"
-    sys.modules["garak.detectors.aegis"] = det_mod
+    det_mod = types.ModuleType("garak.detectors.vinci_adr")
+    det_mod.VinciBlockDetector = VinciBlockDetector
+    det_mod.DEFAULT_CLASS = "VinciBlockDetector"
+    sys.modules["garak.detectors.vinci_adr"] = det_mod
 
     # Register in garak PluginCache
     try:
         from garak._plugins import PluginCache
 
         cache = PluginCache.instance()
-        cache.setdefault("generators", {})["generators.aegis.AegisGenerator"] = {
-            "description": AegisGenerator.__doc__ or "ADR-AEGIS Target Generator",
+        cache.setdefault("generators", {})["generators.vinci_adr.VinciGenerator"] = {
+            "description": VinciGenerator.__doc__ or "Vinci ADR Target Generator",
             "active": True,
             "mod_time": "2026-08-19T00:00:00Z",
-            "name": "ADRAegis",
-            "generator_family_name": "aegis",
+            "name": "VinciADR",
+            "generator_family_name": "vinci_adr",
         }
-        cache.setdefault("detectors", {})["detectors.aegis.AegisBlockDetector"] = {
-            "description": AegisBlockDetector.__doc__ or "ADR-AEGIS Block Decision Detector",
+        cache.setdefault("detectors", {})["detectors.vinci_adr.VinciBlockDetector"] = {
+            "description": VinciBlockDetector.__doc__ or "Vinci ADR Block Decision Detector",
             "active": True,
             "mod_time": "2026-08-19T00:00:00Z",
-            "name": "AegisBlockDetector",
-            "bcp47": "*",
+            "name": "VinciBlockDetector",
+            "detector_family_name": "vinci_adr",
         }
-    except Exception as e:  # noqa: BLE001
-        print(f"[!] Warning during PluginCache registration: {e}")
+    except (ImportError, AttributeError):
+        pass
+
+
+# Compatibility alias
+register_aegis_garak_plugins = register_vinci_garak_plugins
 
 
 def parse_garak_report(report_path: str | Path) -> dict[str, Any]:
@@ -191,7 +195,7 @@ def print_benchmark_report(results: dict[str, Any]) -> None:
     by_probe = results.get("by_probe", {})
 
     print("\n" + "=" * 80)
-    print("  ADR-AEGIS — RAPPORT D'ÉVALUATION ADVERSARIAL (BENCHMARK NVIDIA/GARAK)")
+    print("  Vinci ADR — RAPPORT D'ÉVALUATION ADVERSARIAL (BENCHMARK NVIDIA/GARAK)")
     print("=" * 80)
     print("  PÉRIMÈTRE TESTÉ : 5 Familles d'Attaque Majeures (Crash-Test LLM)")
     print("  • Obfuscation Base64    (probes.encoding)")
@@ -235,7 +239,7 @@ def print_benchmark_report(results: dict[str, Any]) -> None:
 
 def run_benchmark(
     probes: list[str],
-    report_prefix: str = "aegis_garak_benchmark",
+    report_prefix: str = "vinci_garak_benchmark",
     output_json: str | None = None,
     prompt_cap: int | None = 8,
 ) -> dict[str, Any]:
@@ -255,9 +259,9 @@ def run_benchmark(
 
     cli_args = [
         "--target_type",
-        "aegis.AegisGenerator",
+        "vinci_adr.VinciGenerator",
         "--detectors",
-        "aegis.AegisBlockDetector",
+        "vinci_adr.VinciBlockDetector",
         "--spec",
         spec_str,
         "--report_prefix",
@@ -304,7 +308,7 @@ def run_benchmark(
 def main() -> None:
     """CLI entry point for run_garak_benchmark.py."""
     parser = argparse.ArgumentParser(
-        description="Run automated garak adversarial benchmark on ADR-AEGIS"
+        description="Run automated garak adversarial benchmark on Vinci ADR"
     )
     parser.add_argument(
         "--fast",
@@ -326,7 +330,7 @@ def main() -> None:
     parser.add_argument(
         "--report-prefix",
         type=str,
-        default="aegis_garak_benchmark",
+        default="vinci_garak_benchmark",
         help="Prefix for garak report filename",
     )
     parser.add_argument(

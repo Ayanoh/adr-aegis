@@ -2,8 +2,8 @@
 
 import re
 
-from aegis.core.schema import ActionDecision
-from aegis.tier1_fast.heuristics import HeuristicsEngine
+from vinci_adr.core.schema import ActionDecision
+from vinci_adr.tier1_fast.heuristics import HeuristicsEngine
 
 RULE_ID_PATTERN = re.compile(r"^[A-Z]{2,6}(-[A-Z]{2,10}){1,3}-\d{3,4}$")
 

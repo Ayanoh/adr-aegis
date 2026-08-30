@@ -1,6 +1,6 @@
 """Live demonstration and mini-evaluation of Tier 2 Deep cognitive reasoning with Gemini.
 
-Demonstrates ADR-AEGIS's two-tier architecture:
+Demonstrates Vinci ADR's two-tier architecture:
 - Tier 1 (Fast Filter): Identifies unambiguous threats (BLOCK/ALLOW) in <15ms.
 - Tier 2 (Deep Reasoner): Automatically escalates ambiguous (ASK) cases to a dual-agent
   Forensic Analyst + Critic reasoning chain powered by Google Gemini.
@@ -20,8 +20,8 @@ import argparse
 import os
 import sys
 
-from aegis.core.engine import ADRAegisEngine, EngineConfig, EvaluationResult
-from aegis.core.schema import ActionDecision
+from vinci_adr.core.engine import VinciADREngine, EngineConfig, EvaluationResult
+from vinci_adr.core.schema import ActionDecision
 
 # Curated benchmark/demo cases representing realistic ambiguous agent interactions
 DEMO_CASES: list[dict[str, str]] = [
@@ -79,7 +79,7 @@ DEMO_CASES: list[dict[str, str]] = [
 def parse_args() -> argparse.Namespace:
     """Parses command line options."""
     parser = argparse.ArgumentParser(
-        description="ADR-AEGIS Tier 2 Deep Cognitive Reasoning Live Demonstration."
+        description="Vinci ADR Tier 2 Deep Cognitive Reasoning Live Demonstration."
     )
     parser.add_argument(
         "--eval",
@@ -132,11 +132,11 @@ def check_environment() -> None:
 
 
 def run_demo(
-    engine_baseline: ADRAegisEngine, engine_live: ADRAegisEngine, cases: list[dict[str, str]]
+    engine_baseline: VinciADREngine, engine_live: VinciADREngine, cases: list[dict[str, str]]
 ) -> None:
     """Runs interactive verbose demonstration comparing Tier 1 vs Tier 2 adjudication."""
     print("=" * 78)
-    print(" ADR-AEGIS : DÉMONSTRATION DU TIER 2 COGNITIF (DUAL-AGENT GEMINI) ")
+    print(" Vinci ADR : DÉMONSTRATION DU TIER 2 COGNITIF (DUAL-AGENT GEMINI) ")
     print("=" * 78)
     print("Architecture :")
     print("  • Tier 1 : Filtre heuristique & décodeur anti-évasion (<15ms)")
@@ -186,10 +186,10 @@ def run_demo(
         print()
 
 
-def run_evaluation(engine_live: ADRAegisEngine, cases: list[dict[str, str]]) -> None:
+def run_evaluation(engine_live: VinciADREngine, cases: list[dict[str, str]]) -> None:
     """Runs quantitative evaluation measuring Tier 2 decision accuracy on ambiguous cases."""
     print("=" * 78)
-    print(" ADR-AEGIS : ÉVALUATION QUANTITATIVE DU TIER 2 SUR CAS AMBIGUS ")
+    print(" Vinci ADR : ÉVALUATION QUANTITATIVE DU TIER 2 SUR CAS AMBIGUS ")
     print("=" * 78)
 
     correct_count = 0
@@ -261,7 +261,7 @@ def main() -> None:
     cases = DEMO_CASES[: args.limit] if args.limit else DEMO_CASES
 
     # Initialize engines
-    engine_baseline = ADRAegisEngine(
+    engine_baseline = VinciADREngine(
         EngineConfig(
             enable_tier2=False,
             enable_ml=args.with_ml,
@@ -269,7 +269,7 @@ def main() -> None:
         )
     )
 
-    engine_live = ADRAegisEngine(
+    engine_live = VinciADREngine(
         EngineConfig(
             enable_tier2=True,
             enable_ml=args.with_ml,

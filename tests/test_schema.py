@@ -1,11 +1,11 @@
-"""Unit tests for aegis.core.schema models."""
+"""Unit tests for vinci_adr.core.schema models."""
 
 from datetime import datetime
 
 import pytest
 from pydantic import ValidationError
 
-from aegis.core.schema import (
+from vinci_adr.core.schema import (
     ActionDecision,
     AgentEvent,
     ExtractedArtifacts,

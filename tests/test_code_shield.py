@@ -1,7 +1,7 @@
 """Unit tests for Meta PurpleLlama Code Shield security analyzer."""
 
-from aegis.code_shield.scanner import CodeShieldScanner
-from aegis.code_shield.schema import (
+from vinci_adr.code_shield.scanner import CodeShieldScanner
+from vinci_adr.code_shield.schema import (
     CodeShieldConfig,
     CWEType,
 )

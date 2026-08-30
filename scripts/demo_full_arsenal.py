@@ -1,7 +1,7 @@
-"""Grande Démo Live de l'Arsenal Complet ADR-AEGIS (8 Outils Intégrés).
+"""Grande Démo Live de l'Arsenal Complet Vinci ADR (8 Outils Intégrés).
 
 Présentation interactive et pédagogique des 6 scénarios de sécurité
-couvrant l'intégralité des 8 outils de l'arsenal ADR-AEGIS.
+couvrant l'intégralité des 8 outils de l'arsenal Vinci ADR.
 Génère automatiquement le document exécutif `docs/RAPPORT_EXECUTIF_MANAGER.md`.
 """
 
@@ -12,14 +12,14 @@ import time
 from pathlib import Path
 from typing import Any
 
-from aegis.code_shield.scanner import CodeShieldScanner
-from aegis.core.engine import ADRAegisEngine, EngineConfig, SensitivityPreset
-from aegis.core.schema import ActionDecision, ExtractedArtifacts, Tier2Input
-from aegis.daemon.interceptor import AegisDaemon, DaemonConfig
-from aegis.daemon.mcp_interceptor import AegisMCPMiddleware
-from aegis.output_guard.scanner import OutputGuardEngine
-from aegis.tier2_deep.llm_provider import MockLLMProvider
-from aegis.tier2_deep.orchestrator import Tier2Engine
+from vinci_adr.code_shield.scanner import CodeShieldScanner
+from vinci_adr.core.engine import VinciADREngine, EngineConfig, SensitivityPreset
+from vinci_adr.core.schema import ActionDecision, ExtractedArtifacts, Tier2Input
+from vinci_adr.daemon.interceptor import VinciDaemon, DaemonConfig
+from vinci_adr.daemon.mcp_interceptor import VinciMCPMiddleware
+from vinci_adr.output_guard.scanner import OutputGuardEngine
+from vinci_adr.tier2_deep.llm_provider import MockLLMProvider
+from vinci_adr.tier2_deep.orchestrator import Tier2Engine
 
 DOCS_DIR = Path(__file__).resolve().parent.parent / "docs"
 
@@ -27,13 +27,13 @@ DOCS_DIR = Path(__file__).resolve().parent.parent / "docs"
 def print_banner() -> None:
     """Print executive presentation banner."""
     print("\n" + "█" * 80)
-    print("  🛡️  ADR-AEGIS v2.0 — DÉMONSTRATION OFFICIELLE DE L'ARSENAL COMPLET")
+    print("  🛡️  Vinci ADR v2.0 — DÉMONSTRATION OFFICIELLE DE L'ARSENAL COMPLET")
     print("  Garde du corps autonome et poste de contrôle de sécurité pour agents IA")
     print("█" * 80 + "\n")
 
 
 def run_scenario_1_input_encoding(
-    engine: ADRAegisEngine,
+    engine: VinciADREngine,
 ) -> dict[str, Any]:
     """Scénario 1: Attaque masquée Base64 + Règles Sigma MITRE ATT&CK."""
     print("┌" + "─" * 78 + "┐")
@@ -60,7 +60,7 @@ def run_scenario_1_input_encoding(
 
 
 def run_scenario_2_secrets_dlp(
-    engine: ADRAegisEngine,
+    engine: VinciADREngine,
 ) -> dict[str, Any]:
     """Scénario 2: Détection de secrets et tokens volés via Gitleaks."""
     print("┌" + "─" * 78 + "┐")
@@ -89,7 +89,7 @@ def run_scenario_2_secrets_dlp(
 
 
 def run_scenario_3_prompt_guard_jailbreak(
-    engine: ADRAegisEngine,
+    engine: VinciADREngine,
 ) -> dict[str, Any]:
     """Scénario 3: Jailbreak DAN et manipulation de persona."""
     print("┌" + "─" * 78 + "┐")
@@ -168,8 +168,8 @@ def run_scenario_5_daemon_mcp_interception() -> dict[str, Any]:
         "Contexte : Un agent IA autonome tente d'exécuter une commande destructrice via le protocole MCP."
     )
 
-    daemon = AegisDaemon(DaemonConfig(strict_mode=True))
-    mcp = AegisMCPMiddleware(daemon=daemon)
+    daemon = VinciDaemon(DaemonConfig(strict_mode=True))
+    mcp = VinciMCPMiddleware(daemon=daemon)
 
     mcp_request = {
         "jsonrpc": "2.0",
@@ -265,7 +265,7 @@ def generate_executive_report() -> Path:
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
     report_path = DOCS_DIR / "RAPPORT_EXECUTIF_MANAGER.md"
 
-    content = """# 🛡️ ADR-AEGIS — Rapport Exécutif de Sécurité pour la Direction
+    content = """# 🛡️ Vinci ADR — Rapport Exécutif de Sécurité pour la Direction
 
 **Système de Prévention et Garde du Corps Temps Réel pour Agents IA**  
 *Date : Août 2026 | Statut : 100% Opérationnel en Production*
@@ -274,7 +274,7 @@ def generate_executive_report() -> Path:
 
 ## 1. Résumé Exécutif
 
-Face aux risques critiques d'exploitation des agents autonomes et assistants IA (vols de données, exécutions de commandes arbitraires, jailbreaks), **ADR-AEGIS** apporte une solution complète de sécurité multicouche inspirée des travaux de pointe d'**Uber ADR (MLSys 2026)** et **NVIDIA NeMo Guardrails**.
+Face aux risques critiques d'exploitation des agents autonomes et assistants IA (vols de données, exécutions de commandes arbitraires, jailbreaks), **Vinci ADR** apporte une solution complète de sécurité multicouche inspirée des travaux de pointe d'**Uber ADR (MLSys 2026)** et **NVIDIA NeMo Guardrails**.
 
 ### Chiffres Clés de Performance :
 * 🎯 **Taux de blocage des attaques (Rappel)** : **99.2%** (évalué sur les benchmarks réels DEF CON 31 et Garak).
@@ -323,13 +323,13 @@ graph TD
 
 ## 4. Recommandation pour le Déploiement
 
-ADR-AEGIS est immédiatement déployable sous forme de :
+Vinci ADR est immédiatement déployable sous forme de :
 1. **Middleware MCP / Proxy d'entreprise** : Sécurise tous les serveurs d'outils internes sans modifier leur code.
-2. **Bibliothèque Python / Hook LangChain** : Protège les agents IA existants en 1 seule ligne de code (`@aegis_tool()`).
+2. **Bibliothèque Python / Hook LangChain** : Protège les agents IA existants en 1 seule ligne de code (`@vinci_tool()`).
 3. **Passerelle d'API Gateway** : Intercepte et valide tous les flux entrants et sortants.
 
 ---
-*Rapport généré automatiquement par ADR-AEGIS Suite.*
+*Rapport généré automatiquement par Vinci ADR Suite.*
 """
     with open(report_path, "w", encoding="utf-8") as f:
         f.write(content.strip() + "\n")
@@ -339,7 +339,7 @@ ADR-AEGIS est immédiatement déployable sous forme de :
 
 def main() -> None:
     """Main demonstration execution."""
-    parser = argparse.ArgumentParser(description="Run live ADR-AEGIS Arsenal demonstration.")
+    parser = argparse.ArgumentParser(description="Run live Vinci ADR Arsenal demonstration.")
     parser.add_argument(
         "--auto",
         action="store_true",
@@ -349,7 +349,7 @@ def main() -> None:
 
     print_banner()
 
-    engine = ADRAegisEngine(
+    engine = VinciADREngine(
         EngineConfig(
             sensitivity=SensitivityPreset.BALANCED,
             enable_jailbreak_classifier=True,
