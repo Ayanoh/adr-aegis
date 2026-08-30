@@ -68,3 +68,23 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+package-lock.json
+
+# Internal / handoff files (never publish)
+prompt_context.txt
+docs/HANDOFF_*.md
+docs/ORDRE_*.md
+docs/RECAP_*.md
+docs/GUIDE_PRESENTATION_*.md
+docs/PRESENTATION_MANAGER*.md
+docs/RAPPORT_EXECUTIF*.md
+
+# Build artifacts (Puppeteer, Mermaid rendering)
+docs/capture*.js
+docs/render_*.html
+docs/telecharger_*.html
+docs/package*.json
+
+# OS files
+.DS_Store
+Thumbs.db
