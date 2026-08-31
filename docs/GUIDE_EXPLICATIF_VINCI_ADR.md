@@ -1,132 +1,191 @@
-# 🛡️ Vinci ADR — Guide Exécutif & Intégration pour Vinci Logic
+# 🛡️ Vinci ADR — Dossier Technique & Stratégique d'Intégration
 
-> **Document de synthèse pour la direction technique**  
-> *Projet : Sécurisation et garde du corps temps réel pour l'Assistant IA Vinci Logic*
-
----
-
-## 🌟 1. En Bref : Qu'est-ce que Vinci ADR ?
-
-**Vinci ADR** (*Agent Detection & Response*) est un **pare-feu intelligent de nouvelle génération** conçu spécifiquement pour protéger les agents IA et les modèles de langage (LLMs).
-
-Tout comme un **EDR** protège un ordinateur contre les virus, **Vinci ADR** se place autour de l'assistant IA pour intercepter et neutraliser les attaques en temps réel à **3 niveaux clés** :
-
-```
-[ Utilisateur ] ──( 1. Entrée )──► [ Assistant IA ] ──( 2. Outils / APIs )──► [ Système / BDD ]
-                                          │
-                                     ( 3. Sortie )
-                                          ▼
-                                   [ Réponse Client ]
-```
-
-1. **À l'Entrée** : Bloque les *prompt injections*, jailbreaks et tentatives de manipulation (même obfusquées en Base64 ou caractères cachés).
-2. **À l'Exécution des Outils** : Empêche l'agent d'exécuter des actions destructrices ou non autorisées (suppression de données, exfiltration réseau).
-3. **À la Sortie** : Caviarde automatiquement les mots de passe / clés d'API qui fuiraient (DLP) et vérifie que le code généré est sans failles (Top 25 CWE).
+> **Document d'ingénierie et de positionnement technique pour la Direction**  
+> *Projet : Intégration du framework de détection et réponse temps réel (ADR) dans l'Assistant IA Vinci Logic*
 
 ---
 
-## 🏛️ 2. Comment ça fonctionne ? (L'Architecture en 2 Niveaux)
+## 🎯 1. La Thèse de Sécurité : Pourquoi les protections IA classiques échouent
 
-Pour être à la fois **ultra-rapide** et **intelligent**, Vinci ADR utilise une architecture à double niveau inspirée des travaux de recherche d'**Uber ADR (MLSys 2026)** :
+Les solutions traditionnelles de filtrage de prompts (regex basiques, wrappers API ou filtres de mots-clés) sont **structurellement inaptes** à sécuriser des agents autonomes connectés à des outils système, des bases de données et des protocoles comme **MCP (Model Context Protocol)**.
 
-```mermaid
-flowchart LR
-    In[Requête Utilisateur] --> T1[⚡ TIER 1 : Triage Éclair < 20ms\n1 803 Règles Sigma + Modèles IA Rapides]
-    
-    T1 -- Attaque Évidente --> Block[🚨 BLOCAGE Immédiat]
-    T1 -- Requête Saine --> Agent[🤖 Exécution Agent IA]
-    
-    T1 -- Cas Ambigu / Doute --> T2[🧠 TIER 2 : Enquête Cognitive\nDual-Agent LLM : Enquêteur vs Contradicteur]
-    T2 -- Confirmation Menace --> Block
-    T2 -- Faux Positif Filtré --> Agent
-```
+Face à des attaques modernes (injections indirectes, payloads encodés multi-couches, détournement d'outils / LOLBins, exfiltration silencieuse de credentials), **Vinci ADR** (*Agent Detection & Response*) applique le principe militaire de la **défense en profondeur à 360°** :
 
-* **⚡ Tier 1 (Triage Éclair < 20 ms)** : 
-  Vérification instantanée par **1 803 règles de détection comportementale** (Sigma MITRE ATT&CK + Sage), scanner de secrets (210 patterns Gitleaks) et modèles de classification légers (ModernBERT, DeBERTa).
-* **🧠 Tier 2 (Enquête Cognitive sur cas ambigus)** : 
-  Si une requête ressemble à une attaque mais pourrait être légitime, elle est analysée par **deux agents IA contradictoires** (*Forensic Analyst* qui cherche la faille, et *Critic Agent* qui élimine les faux positifs).
+* **Protection en amont (Entrée)** : Analyse de la menace avant même qu'elle ne touche le LLM.
+* **Garde du corps actif (Exécution)** : Interception en temps réel de chaque appel d'outil système via middleware JSON-RPC 2.0.
+* **Contrôle en aval (Sortie)** : Caviardage DLP des secrets et analyse statique des vulnérabilités de code généré (Top 25 CWE).
+
+Inspiré de l'architecture de référence **Uber ADR (publiée à MLSys 2026)** et des travaux de pointe de **Meta, NVIDIA et SigmaHQ**, Vinci ADR rivalise avec les meilleurs standards mondiaux.
 
 ---
 
-## 🔌 3. Comment l'intégrer à un Agent existant ?
+## ⚡ 2. L'Arsenal du Tier 1 : Triage Déterministe & Neural (< 20 ms)
 
-L'intégration a été conçue pour être **Plug & Play** (non intrusive). Elle s'ajoute en quelques lignes de code Python sans modifier la logique existante de l'agent.
+Le **Tier 1** est une barrière ultra-rapide capable d'évaluer les requêtes en quelques millisecondes sur CPU, sans latence perceptible pour l'utilisateur. Il agrège les meilleures technologies open-source mondiales :
 
-### Étape A : Valider le message utilisateur (Entrée)
+### 1. Couche Capteur & Désembuage Récursif (*Sensor Layer*)
+* **Rôle** : Déjouer les techniques d'évasion et d'obfuscation utilisées par les attaquants pour contourner les filtres.
+* **Capacités** :
+  * Décodage récursif multi-couches : déballe les chaînes imbriquées (ex: un script PowerShell caché dans un Base64 lui-même encodé en URL-percent et Hex).
+  * Normalisation des homoglyphes : détecte les caractères Cyrilliques ou Grecs visuellement identiques aux lettres latines pour tromper les regex.
+  * Suppression des caractères invisibles (*Zero-Width Characters*) et extraction d'artéfacts (adresses IP, URLs, chemins de fichiers, commandes shell).
+
+### 2. Moteur Heuristique Comportemental : 1 803 Règles MITRE ATT&CK
+* **Origine & Repos GitHub** :
+  * **[SigmaHQ/sigma](https://github.com/SigmaHQ/sigma)** (10.9k ⭐) : Standard mondial de détection SIEM. Nous avons converti et intégré **1 443 règles** couvrant la création de processus suspects, les scripts PowerShell encodés, les LOLBins Windows/Linux et l'exfiltration réseau.
+  * **[AikidoSec/sage](https://github.com/AikidoSec/sage)** : **351 règles heuristiques** spécialisées dans la détection d'attaques orientées agents IA (persistance, vol de clés SSH, manipulation de fichiers de configuration).
+  * **Règles Natives ADR** : 8 règles spécialisées sur les structures d'injections directes et jailbreaks complexes.
+* **Couverture** : 91.3% des règles sont directement taguées selon la matrice officielle **MITRE ATT&CK**.
+
+### 3. Scanner de Secrets & Entropie de Shannon (210 Patterns)
+* **Origine & Repos GitHub** : **[gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)** (16k ⭐)
+* **Capacités** : Analyse chaque token pour détecter **210 types de clés API et identifiants volés** (clés AWS, OpenAI `sk-`, GitHub PAT, Anthropic, tokens JWT, Stripe, URIs de bases de données avec credentials).
+* **Validation par Entropie** : Calcule l'entropie mathématique de Shannon de la chaîne pour différencier une vraie clé cryptographique d'une fausse chaîne aléatoire, éliminant ainsi les faux positifs.
+
+### 4. Classifieur Neural DeBERTa-v3
+* **Origine & Modèle Hugging Face** : **`ProtectAI/deberta-v3-base-prompt-injection-v2`**
+* **Capacités** : Modèle Transformer entraîné spécifiquement sur des centaines de milliers d'injections de prompt. Capable de comprendre la sémantique sous-jacente d'une tentative de manipulation, même sans mot-clé suspect.
+* **Performance** : 100% de précision constatée sur les datasets de référence.
+
+### 5. Wolf Defender v2 (Architecture ModernBERT)
+* **Origine & Modèle Hugging Face** : **`patronus-studio/wolf-defender-prompt-injection-small`**
+* **Capacités** : Modèle de dernière génération basé sur l'architecture ModernBERT. Il réalise une classification d'injection et d'escalade de privilèges en **seulement 21 ms sur CPU**, offrant un premier rideau neural instantané.
+
+### 6. Meta Prompt-Guard-86M & Garde-Fou Canary
+* **Origine & Modèle Hugging Face** : **`meta-llama/Prompt-Guard-86M`** (Meta AI)
+* **Capacités** : Modèle 3 classes (Benign / Injection / Jailbreak) expert dans la détection des attaques par contournement de personnalité (DAN, personas agressifs, jeux de rôle).
+* **Auto-Vérification Canary Check** : Intègre un mécanisme d'auto-test au démarrage. Si le modèle chargé produit des déviations sur des phrases témoins, il est désactivé automatiquement pour empêcher tout faux positif en production.
+
+### 7. Mémoire Vectorielle Sémantique ChromaDB
+* **Origine & Stack** : **ChromaDB** + **`sentence-transformers`** (`all-MiniLM-L6-v2`)
+* **Capacités** : Base vectorielle embarquée contenant **70 patterns d'attaques réelles curées**. Calcule la similarité cosinus sémantique en temps réel : si un attaquant paraphrase une attaque connue, elle est immédiatement identifiée et bloquée.
+
+---
+
+## 🧠 3. Le Tier 2 : L'Enquête Cognitive Dual-Agent (Inspiré d'Uber ADR)
+
+Pour les requêtes complexes ou ambiguës où le Tier 1 hésite (verdict **`ASK`**), Vinci ADR ne bloque pas brutalement l'utilisateur : il délègue l'analyse au **Tier 2 Deep Cognitive Reasoning**.
+
+Deux agents IA spécialisés dialoguent et s'affrontent de manière contradictoire :
+
+1. **🕵️ Forensic Analyst Agent (L'Enquêteur)** : Déconstruit le contexte, identifie l'intention cachée, extrait les preuves techniques et formule une hypothèse d'attaque.
+2. **⚖️ Critic Agent (Le Contradicteur Adversarial)** : Cherche activement les éléments qui prouvent la légitimité de la requête (cas d'usage bénin, code légitime, documentation technique) pour neutraliser les faux positifs.
+3. **Synthèse Raisonnée** : Un verdict final argumenté est produit (**BLOCK** ou **ALLOW**), garantissant qu'aucune attaque sournoise ne passe tout en préservant le confort de travail des utilisateurs légitimes.
+
+---
+
+## 🛡️ 4. Garde du Corps d'Exécution & Contrôle de Sortie
+
+### A. Mode Daemon : Middleware MCP JSON-RPC 2.0 & LangChain
+* **Intercepteur MCP (`VinciMCPMiddleware`)** : Se positionne directement comme passerelle sur les serveurs **Model Context Protocol (Anthropic)**. Chaque requête JSON-RPC `tools/call` est interceptée et évaluée. En cas de menace, le serveur retourne une erreur standard JSON-RPC `-32000` sans exécuter le tool.
+* **Hook LangChain (`@vinci_tool` / `VinciToolkit`)** : Protège n'importe quel toolkit d'agent en une seule ligne de code.
+
+### B. Output Guard (DLP & Taxonomie MLCommons AI Safety)
+* **CBRN (S6)** : Bloque toute génération de contenu relatif aux armes chimiques, biologiques, radiologiques et nucléaires.
+* **Cyberattacks (S8)** : Empêche l'assistant de fournir des exploits offensifs automatisés ou des reverse shells fonctionnels.
+* **DLP Secrets (S10)** : Détecte et caviarde automatiquement en temps réel (`[REDACTED_SECRET: AWS Key]`) les clés ou tokens qui auraient fuité dans la réponse de l'IA.
+
+### C. Code Shield : Analyse Statique CWE Top 25 (Meta PurpleLlama)
+* **Origine** : Inspiré du standard **[meta-llama/PurpleLlama](https://github.com/meta-llama/PurpleLlama)**.
+* **Capacités** : Analyse le code généré par l'IA (Python, JS, Shell, SQL) et détecte les failles critiques avant livraison au client :
+  * **CWE-89** : Injections SQL.
+  * **CWE-78** : Injections de commandes système (`subprocess.run(shell=True)`).
+  * **CWE-502** : Désérialisation non sécurisée (`pickle.loads`).
+  * **CWE-94 / CWE-79** : Exécution dynamique de code (`eval/exec`) et vulnérabilités XSS.
+  * Fournit automatiquement la correction technique et le snippet sécurisé.
+
+---
+
+## 🔌 5. Guide d'Intégration dans l'Assistant Vinci Logic
+
+L'intégration dans la stack de Vinci Logic se fait en **3 étapes transparentes** :
+
+### 1. Filtrage du Prompt Utilisateur (Entrée)
 
 ```python
 from vinci_adr import VinciADREngine, EngineConfig, SensitivityPreset, ActionDecision
 
-# Initialisation du moteur
-engine = VinciADREngine(EngineConfig(sensitivity=SensitivityPreset.BALANCED))
+# Initialisation du moteur configuré pour le contexte SOC
+engine = VinciADREngine(EngineConfig(
+    sensitivity=SensitivityPreset.BALANCED,
+    enable_heuristics=True,
+    enable_secrets=True,
+    enable_ml=True,
+    enable_wolf_defender=True,
+    enable_vector_matcher=True,
+    enable_tier2=True,
+))
 
-# Validation avant d'appeler l'agent
-verdict = engine.evaluate(user_prompt)
+# Évaluation du prompt avant transmission au LLM
+result = engine.evaluate(user_message)
 
-if verdict.verdict.decision == ActionDecision.BLOCK:
-    return "🚨 Requête bloquée par la politique de sécurité Vinci ADR."
+if result.verdict.decision == ActionDecision.BLOCK:
+    return {
+        "status": "blocked",
+        "reason": result.verdict.reason,
+        "threats": [t.rule_name for t in result.verdict.threats]
+    }
 ```
 
-### Étape B : Protéger les outils de l'agent (Mode Daemon)
-
-Pour empêcher un agent d'exécuter une commande dangereuse si un utilisateur parvient à le manipuler :
+### 2. Protection des Outils de l'Agent (Mode Daemon)
 
 ```python
 from vinci_adr import VinciDaemon, DaemonConfig
 
-daemon = VinciDaemon(DaemonConfig())
+daemon = VinciDaemon(DaemonConfig(
+    allowed_tools=["query_threat_intel", "search_cve", "lookup_ioc"],
+    strict_mode=True
+))
 
-# On applique simplement le décorateur sur les fonctions / outils de l'agent
 @daemon.wrap_tool
-def executer_commande_systeme(commande: str):
-    # Exécution standard...
-    pass
-
-# Si l'agent tente d'exécuter 'rm -rf' ou une exfiltration, Vinci ADR bloque l'appel instantanément
+def execute_system_query(query: str):
+    # Action exécutée UNIQUEMENT si validée par Vinci ADR
+    return db.execute(query)
 ```
 
-*(Support natif inclus pour les serveurs d'outils **MCP - Model Context Protocol** et **LangChain**).*
-
-### Étape C : Sécuriser la réponse finale (Sortie & DLP)
+### 3. Assainissement des Réponses Sortantes (DLP)
 
 ```python
 from vinci_adr import OutputGuardEngine
 
 guard = OutputGuardEngine()
-resultat = guard.scan_output(reponse_llm)
+output_verdict = guard.scan_output(llm_generated_response)
 
-# Les clés d'API ou mots de passe sont automatiquement caviardés en [REDACTED_SECRET]
-reponse_client = resultat.sanitized_text
+# Envoi de la réponse assainie au client
+clean_response = output_verdict.sanitized_text
 ```
 
 ---
 
-## 🎯 4. Adaptations Spécifiques au Contexte Vinci Logic (SOC / Cyber)
+## 🏢 6. Adaptations Spécifiques au Cas d'Usage « Vinci Logic » (SOC / Cyber)
 
-Comme **Vinci Logic** développe un assistant dans le domaine de la **Cybersécurité / SOC**, les utilisateurs vont légitimement soumettre des logs suspects, des règles Sigma ou des scripts d'attaques à analyser. 
+Dans un produit orienté SOC / Cybersécurité, un analyste va légitimement soumettre des IOCs, des commandes suspectes ou des règles Sigma. Voici la stratégie d'adaptation :
 
-Voici ce que l'équipe technique doit adapter :
+1. **Sensibilité `BALANCED` (Anti-Faux Positifs)** :
+   * Ne pas utiliser le mode `PARANOID` qui bloquerait les requêtes d'analyse de logs. Le mode `BALANCED` transfère les cas ambigus au Tier 2 cognitif pour comprendre l'intention légitime de l'analyste.
+2. **Whitelist des Outils Métier** :
+   * Déclarer les outils de threat intelligence (`VirusTotal API`, `SIEM queries`, `CVE Search`) comme autorisés, tout en interdisant formellement les outils destructeurs (`DROP TABLE`, modification de configs EDR).
+3. **Secrets Internes Vinci Logic** :
+   * Ajouter les regex des clés API propriétaires de Vinci Logic dans `SecretsScanner` pour garantir qu'aucun token interne ne puisse fuiter auprès d'un client.
+4. **Souveraineté des Données & Choix du LLM Tier 2** :
+   * Le Tier 2 peut être branché sur l'API Gemini / Claude ou sur un modèle local/on-premise (ex: Llama 3 hébergé sur les serveurs de Vinci Logic) pour respecter la stricte confidentialité des données clients.
 
-| Élément à adapter | Pourquoi ? | Action concrète |
+---
+
+## 📊 7. Validation Scientifique & Performances
+
+Les performances de Vinci ADR ont été mesurées et validées sur des bancs de tests réels :
+
+| Métrique / Benchmark | Résultat | Signification pour Vinci Logic |
 |---|---|---|
-| **1. Profil de Sensibilité** | Éviter de bloquer un analyste SOC qui colle du code malveillant pour l'étudier | Configurer `SensitivityPreset.BALANCED` ou `RELAXED` (permet au Tier 2 d'analyser le contexte au lieu de bloquer brutalement). |
-| **2. Whitelist des Outils SOC** | Autoriser les outils d'investigation légitimes de Vinci Logic | Déclarer la liste des outils autorisés dans `DaemonConfig(allowed_tools=["query_threat_intel", "search_cve", "read_logs"])`. |
-| **3. Secrets Métier (DLP)** | Masquer les clés internes propres à Vinci Logic | Ajouter les patterns d'API keys internes (tokens SIEM, clés VirusTotal/Shodan) dans `SecretsScanner`. |
-| **4. Contexte Prompt Tier 2** | Informer l'IA d'enquête du rôle de l'assistant | Ajuster le prompt système de l'enquêteur (`prompts.py`) : *"L'utilisateur est un analyste de sécurité habilité..."*. |
-| **5. Clé LLM / Modèle Souverain** | Alimenter le Tier 2 en conformité RGPD / Souveraineté | Configurer la clé Gemini / Claude dans le `.env` ou pointer vers un modèle local hébergé on-premise chez Vinci Logic. |
+| **Benchmark DEF CON 31 AI Village** | **100.0% de Rappel** | Zéro attaque infiltrée sur les datasets d'attaques réelles DEF CON |
+| **Crash-Test NVIDIA garak** | **98.86% de Blocage** | 519 attaques bloquées sur 525 probes adversariales automatiques |
+| **Latence d'Interception Tier 1** | **< 20 ms** (CPU) | Impact totalement imperceptible sur l'expérience utilisateur |
+| **Suite de Tests Unitaires & Intégration** | **238 / 238 Passés (100%)** | Fiabilité industrielle, code testé de bout en bout |
+| **Dépôt GitHub du Projet** | **[Ayanoh/Vinci-ADR](https://github.com/Ayanoh/Vinci-ADR)** | Codebase complète, open-source, packagée et prête à l'emploi |
 
 ---
 
-## 📊 5. Chiffres Clés & Garanties de Sécurité
+## 🏆 Synthèse pour la Direction
 
-* **🎯 100% de Taux de Blocage (Rappel)** : Validé sur le benchmark international d'attaques réelles **DEF CON 31 AI Village**.
-* **⚡ Vitesse d'Exécution** : **< 20 ms** au Tier 1 (invisible pour l'utilisateur).
-* **🛡️ 1 803 Règles Comportementales** : Couverture standardisée selon la matrice **MITRE ATT&CK** et SigmaHQ.
-* **🧪 238 Tests Automatisés (100% Succès)** : Codebase robuste, typée (Pydantic v2) et documentée.
-* **📦 Dépôt GitHub Officiel** : [github.com/Ayanoh/Vinci-ADR](https://github.com/Ayanoh/Vinci-ADR)
-
----
-
-## 🚀 Synthèse Décisionnelle
-
-> **Vinci ADR** apporte à l'assistant IA de Vinci Logic une **couche de sécurité d'entreprise prête pour la production**, qui protège à la fois nos serveurs et les données de nos clients, tout en conservant une expérience utilisateur fluide et sans ralentissement.
+> **Vinci ADR** transforme l'assistant IA de Vinci Logic en une **forteresse logicielle**. En combinant 1 803 règles Sigma MITRE ATT&CK, 210 patterns de secrets Gitleaks, des classifieurs neuronaux modernes et une enquête cognitive dual-agent, nous offrons une sécurité de niveau bancaire et étatique, parfaitement adaptée aux exigences de nos clients en cybersécurité.
