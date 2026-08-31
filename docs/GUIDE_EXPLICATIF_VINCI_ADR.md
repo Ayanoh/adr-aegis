@@ -1,6 +1,6 @@
 # 🛡️ Vinci ADR — Dossier Technique & Stratégique d'Intégration
 
-> **Document d'ingénierie et de positionnement technique pour la Direction**  
+> **Document d'ingénierie et de positionnement technique**  
 > *Projet : Intégration du framework de détection et réponse temps réel (ADR) dans l'Assistant IA Vinci Logic*
 
 ---
@@ -159,22 +159,26 @@ clean_response = output_verdict.sanitized_text
 
 ## 🏢 6. Adaptations Spécifiques au Cas d'Usage « Vinci Logic » (SOC / Cyber)
 
-Dans un produit orienté SOC / Cybersécurité, un analyste va légitimement soumettre des IOCs, des commandes suspectes ou des règles Sigma. Voici la stratégie d'adaptation :
+Dans un environnement SOC et cybersécurité, les utilisateurs vont naturellement soumettre des commandes suspectes, des fragments de malwares ou des règles de détection pour analyse. Voici les axes d'adaptation technique pour l'équipe :
 
-1. **Sensibilité `BALANCED` (Anti-Faux Positifs)** :
-   * Ne pas utiliser le mode `PARANOID` qui bloquerait les requêtes d'analyse de logs. Le mode `BALANCED` transfère les cas ambigus au Tier 2 cognitif pour comprendre l'intention légitime de l'analyste.
-2. **Whitelist des Outils Métier** :
-   * Déclarer les outils de threat intelligence (`VirusTotal API`, `SIEM queries`, `CVE Search`) comme autorisés, tout en interdisant formellement les outils destructeurs (`DROP TABLE`, modification de configs EDR).
-3. **Secrets Internes Vinci Logic** :
-   * Ajouter les regex des clés API propriétaires de Vinci Logic dans `SecretsScanner` pour garantir qu'aucun token interne ne puisse fuiter auprès d'un client.
-4. **Souveraineté des Données & Choix du LLM Tier 2** :
-   * Le Tier 2 peut être branché sur l'API Gemini / Claude ou sur un modèle local/on-premise (ex: Llama 3 hébergé sur les serveurs de Vinci Logic) pour respecter la stricte confidentialité des données clients.
+1. **Raffinement & Personnalisation des Règles YAML / Sigma (`rules/`)** :
+   * **Le contexte** : Les analystes SOC collent couramment des logs contenant des signatures de menaces (`mimikatz`, `powershell -enc`, payloads C2).
+   * **L'action** : L'équipe technique peut affiner directement les règles de détection YAML dans `rules/sigma/`, `rules/commands/` et `rules/sage/`. Il est possible de configurer des conditions d'exclusion spécifiques ou d'ajuster les pondérations pour que le Tier 1 distingue clairement une attaque visant à manipuler l'assistant d'une demande légitime d'investigation de sécurité.
+
+2. **Whitelist & Encadrement des Outils Métier** :
+   * Déclarer les outils d'investigation SOC autorisés (`VirusTotal API`, requêtes SIEM en lecture seule, recherche de CVE) dans `DaemonConfig`, tout en interdisant formellement l'accès aux outils destructeurs (`DROP TABLE`, altération de règles EDR).
+
+3. **Secrets Internes & Tokens Vinci Logic** :
+   * Ajouter les formats de clés API internes et tokens d'infrastructure propres à Vinci Logic dans `SecretsScanner` pour garantir qu'aucune donnée de configuration critique ne puisse fuiter lors d'une session.
+
+4. **Souveraineté des Données & Modèle Local pour le Tier 2** :
+   * Le Tier 2 cognitif peut être connecté aux APIs de modèles de pointe (Claude, Gemini, GPT-4) ou configuré pour interroger un modèle local auto-hébergé (ex: Llama 3 on-premise) afin de garantir la stricte confidentialité des données et des logs clients.
 
 ---
 
 ## 📊 7. Validation Scientifique & Performances
 
-Les performances de Vinci ADR ont été mesurées et validées sur des bancs de tests réels :
+Les performances de Vinci ADR ont été mesurées et validées sur des bancs d'essais réels :
 
 | Métrique / Benchmark | Résultat | Signification pour Vinci Logic |
 |---|---|---|
@@ -183,9 +187,3 @@ Les performances de Vinci ADR ont été mesurées et validées sur des bancs de 
 | **Latence d'Interception Tier 1** | **< 20 ms** (CPU) | Impact totalement imperceptible sur l'expérience utilisateur |
 | **Suite de Tests Unitaires & Intégration** | **238 / 238 Passés (100%)** | Fiabilité industrielle, code testé de bout en bout |
 | **Dépôt GitHub du Projet** | **[Ayanoh/Vinci-ADR](https://github.com/Ayanoh/Vinci-ADR)** | Codebase complète, open-source, packagée et prête à l'emploi |
-
----
-
-## 🏆 Synthèse pour la Direction
-
-> **Vinci ADR** transforme l'assistant IA de Vinci Logic en une **forteresse logicielle**. En combinant 1 803 règles Sigma MITRE ATT&CK, 210 patterns de secrets Gitleaks, des classifieurs neuronaux modernes et une enquête cognitive dual-agent, nous offrons une sécurité de niveau bancaire et étatique, parfaitement adaptée aux exigences de nos clients en cybersécurité.
